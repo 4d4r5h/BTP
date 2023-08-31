@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BTP Project</title>
+    <!-- leaflet css cdn -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <!-- leaflet routing machine css cdn -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <!-- leaflet js cdn -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <!-- leaflet routing machine js cdn -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+    <script>
+      var map = L.map("map").setView([14.0860746, 100.608406], 6); // coords, zoom level
+      var OSM = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      });
+      OSM.addTo(map);
+
+      if (!navigator.geolocation) {
+        console.log("Your browser doesn't support geolocation feature!");
+      } else {
+        navigator.geolocation.getCurrentPosition(getPosition);
+      }
+
+      var marker, circle, curLatitude, curLongitude;
+
+      function getPosition(position) {
+        curLatitude = position.coords.latitude;
+        curLongitude = position.coords.longitude;
+        var accuracy = position.coords.accuracy;
+
+        if (marker) {
+          map.removeLayer(marker);
+        }
+
+        if (circle) {
+          map.removeLayer(circle);
+        }
+
+        marker = L.marker([curLatitude, curLongitude]);
+        circle = L.circle([curLatitude, curLongitude], { radius: accuracy });
+
+        var featureGroup = L.featureGroup([marker, circle]).addTo(map);
+
+        map.fitBounds(featureGroup.getBounds());
+      }
+
+      map.on("click", function (e) {
+        var newMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+        L.Routing.control({
+          waypoints: [
+            L.latLng(curLatitude, curLongitude),
+            L.latLng(e.latlng.lat, e.latlng.lng),
+          ],
+        }).addTo(map);
+      });
+    </script>
+  </body>
+</html>
