@@ -58,11 +58,8 @@
       );
 
       const main = (curLatitude, curLongitude) => {
-        var map = L.map("map"),
-          waypoints = [
-            L.latLng(curLatitude, curLongitude),
-            L.latLng(curLatitude, curLongitude),
-          ];
+        var map = L.map("map").setView(L.latLng(curLatitude, curLongitude), 12);
+        var waypoints = [L.latLng(curLatitude, curLongitude)];
 
         L.tileLayer(LRM.tileLayerUrl, {
           attribution:
@@ -75,7 +72,6 @@
           }),
           plan: L.Routing.plan(waypoints, {
             createMarker: function (i, wp) {
-              console.log("hello World");
               return L.marker(wp.latLng, {
                 draggable: true,
                 icon: L.icon.glyph({ glyph: String.fromCharCode(65 + i) }),
@@ -106,6 +102,16 @@
           });
 
         L.Routing.errorControl(control).addTo(map);
+
+        map.on("click", function (e) {
+          L.popup().setLatLng(e.latlng);
+          if (waypoints.length <= 1) {
+            waypoints.push(e.latlng);
+            if (waypoints.length == 2) control.setWaypoints(waypoints);
+          } else {
+            control.spliceWaypoints(control.getWaypoints().length, 0, e.latlng);
+          }
+        });
       };
     </script>
   </body>
