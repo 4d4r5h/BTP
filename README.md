@@ -1,2 +1,2 @@
 # BTP
-Under Samrat Mondal
+Under the guidance of Prof. Samrat Mondal
