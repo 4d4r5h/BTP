@@ -1,0 +1,40 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html,
+body,
+#map {
+  height: 100%;
+  width: 100%;
+}
+#speak_button {
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  z-index: 500;
+  height: 25px;
+  width: 50px;
+  margin: 10px;
+}
+
+
+#container {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin: 10px;
+  z-index: 600;
+}
+.input-container {
+  top: 0px;
+  right: 0px;
+  margin: 10px;
+}
+.text-input {
+  display: block;
+  margin-bottom: 5px;
+  padding: 5px;
+  width: 200px;
+}
