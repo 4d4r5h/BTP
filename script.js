@@ -87,6 +87,11 @@ function showTrafficCongestion(routeArray) {
     return object1.travelTimeInSeconds - object2.travelTimeInSeconds;
   });
   const colors = ["green", "orange", "red"];
+
+  for (let i = 0; i < maximumCountOfRoutes; i++) {
+    polylines[i].setLatLngs([]);
+  }
+
   for (let i = 0; i < routeArray.length && i < 3; i++) {
     const index = routeArray[i].index;
     const route = routeArray[i].route;
@@ -148,7 +153,9 @@ function addMarker(coordinate) {
     const textInput = getTextInputByNumber(textInputNumber);
     textInput.value = e.target._latlng;
     waypoints[textInputNumber - 1] = e.target._latlng;
-    doRouting({});
+    doRouting({
+      maxAlternatives: 5,
+    });
   });
   marker.addTo(map);
 }
