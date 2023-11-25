@@ -37,7 +37,7 @@ L.tileLayer(LRM.tileLayerURL, {
 const maximumCountOfRoutes = 6;
 const polylines = [];
 for (let i = 0; i < maximumCountOfRoutes; i++) {
-  polylines.push(L.polyline([], {}).addTo(map));
+  polylines.push(L.polyline([], {}));
 }
 
 function giveLatsLngs(_waypoints) {
@@ -89,16 +89,17 @@ function showTrafficCongestion(routeArray) {
   const colors = ["green", "orange", "red"];
 
   for (let i = 0; i < maximumCountOfRoutes; i++) {
-    polylines[i].setLatLngs([]);
+    polylines[i].removeFrom(map);
   }
 
-  for (let i = 0; i < routeArray.length && i < 3; i++) {
+  for (let i = Math.min(2, routeArray.length - 1); i >= 0; i--) {
     const index = routeArray[i].index;
     const route = routeArray[i].route;
     polylines[index].setLatLngs(route);
     polylines[index].setStyle({
       color: colors[i],
     });
+    polylines[index].addTo(map);
   }
 }
 
