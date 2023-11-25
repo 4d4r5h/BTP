@@ -129,6 +129,15 @@ function doRouting(options) {
   });
 }
 
+async function geocode(coordinate) {
+  const latitude = coordinate.lat;
+  const longitude = coordinate.lng;
+  const URL = `https://geocode.maps.co/reverse?lat=${latitude}&lon=${longitude}`;
+  const object = await fetch(URL);
+  const json = await object.json();
+  return json;
+}
+
 function getTextInputByNumber(number) {
   return document.getElementById("input" + number);
 }
@@ -136,10 +145,11 @@ function getTextInputByNumber(number) {
 function fillTextInput() {
   const lengthOfWaypoints = waypoints.length;
   const inputContainer = document.getElementsByClassName("input-container")[0];
-  const newTextInput = `<input type="text" class="text-input" value="${
-    waypoints[lengthOfWaypoints - 1]
-  }" id="input${lengthOfWaypoints}" />`;
-  inputContainer.innerHTML += newTextInput;
+  geocode(waypoints[lengthOfWaypoints - 1]).then((json) => {
+    const address = json.display_name;
+    const newTextInput = `<input type="text" class="text-input" value="${address}" id="input${lengthOfWaypoints}" />`;
+    inputContainer.innerHTML += newTextInput;
+  });
 }
 
 function addMarker(coordinate) {
@@ -151,7 +161,10 @@ function addMarker(coordinate) {
   marker.on("moveend", (e) => {
     const textInputNumber = e.sourceTarget.options.icon.options.glyph;
     const textInput = getTextInputByNumber(textInputNumber);
-    textInput.value = e.target._latlng;
+    geocode(e.target._latlng).then((json) => {
+      const address = json.display_name;
+      textInput.value = address;
+    });
     waypoints[textInputNumber - 1] = e.target._latlng;
     doRouting({
       maxAlternatives: 5,
