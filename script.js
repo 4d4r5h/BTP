@@ -101,8 +101,8 @@ function showTrafficCongestion(routeArray) {
 
     for (let i = Math.min(2, countOfRoutes - 1); i >= 0; i--) {
       const content =
-        `<b>Distance:</b> ${routes[i].lengthInMeters} meter` +
-        `<br><b>Travel Time:</b> ${routes[i].travelTimeInSeconds} seconds`;
+        `<b>Distance:</b> ${Math.round((routes[i].lengthInMeters/100) * 100) / 1000} km` +
+        `<br><b>Travel Time:</b> ${Math.round((routes[i].travelTimeInSeconds/60) * 100) / 100} minutes`;
       polylines.push(
         L.polyline(routes[i].route, {
           color: colors[i],
