@@ -326,7 +326,7 @@ map.on("click", (e) => {
 });
 
 document.getElementById("add_label_button").addEventListener("click", () => {
-  window.location.href = "/add_label.html";
+  window.location.href = "/BTP/add_label.html";
 });
 
 document.getElementById("recenter_button").addEventListener("click", () => {
