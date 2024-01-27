@@ -1,5 +1,5 @@
 window.LRM = {
-  tileLayerURL: "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+  tileLayerURL: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   tomtomAccessToken: "jkf8G4nkI5HAHsFkJAom3KtGONAyLeuU",
 };
 
@@ -32,7 +32,7 @@ L.control
   .addTo(map);
 
 L.tileLayer(LRM.tileLayerURL, {
-  subdomains: ["mt0", "mt1", "mt2", "mt3"],
+  // subdomains: ["mt0", "mt1", "mt2", "mt3"],
   opacity: 1.0,
   attribution: attribution,
 }).addTo(map);
