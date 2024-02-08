@@ -1,7 +1,5 @@
 {
     "dependencies": {
-      "react-native-paper": "4.9.2",
-      "@expo/vector-icons": "^13.0.0",
       "react-native-maps": "1.7.1"
     }
   }
