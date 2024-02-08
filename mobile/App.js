@@ -19,7 +19,7 @@ const App = () => {
   const [destLatitude, setDestLatitude] = useState('');
   const [destLongitude, setDestLongitude] = useState('');
 
-  // State for storing the coordinates to draw a polyline in the map
+  // State for storing the coordinates to draw a polyline on the map
   const [pathCoordinates, setPathCoordinates] = useState([]);
 
   // State for search query in the "Search Place" section
@@ -93,7 +93,7 @@ const App = () => {
     if (searchQuery) {
       try {
         const response = await fetch(
-          `https://geocode.maps.co/search?q=${searchQuery}&api_key=65c44417e0aca565166909xnt731e24`
+            `https://geocode.maps.co/search?q=${encodeURIComponent(searchQuery)}&api_key=65c44417e0aca565166909xnt731e24`
         );
         const result = await response.json();
 
@@ -264,7 +264,7 @@ const App = () => {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-      >
+        >
         {/* Polyline to Show Path */}
         {pathCoordinates.length > 0 && (
           <Polyline coordinates={pathCoordinates} strokeWidth={2} strokeColor="red" />
