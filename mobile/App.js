@@ -3,24 +3,32 @@ import { StyleSheet, View, TextInput, Button, TouchableOpacity, Text } from 'rea
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const App = () => {
-  const [latitude, setLatitude] = useState(''); // State for latitude input
-  const [longitude, setLongitude] = useState(''); // State for longitude input
+  // State for latitude and longitude in the "Set Coordinates" section
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+
+  // States for controlling the visibility of different sections in the menu
   const [isMenuExpanded, setMenuExpanded] = useState(false);
   const [isCoordinatesSectionExpanded, setCoordinatesSectionExpanded] = useState(false);
-  const [sourceLat, setSourceLat] = useState('');
-  const [sourceLong, setSourceLong] = useState('');
-  const [destLat, setDestLat] = useState('');
-  const [destLong, setDestLong] = useState('');
   const [isShowPathSectionExpanded, setShowPathSectionExpanded] = useState(false);
+
+  // States for input values in the "Show Path" section
+  const [sourceLatitude, setSourceLatitude] = useState('');
+  const [sourceLongitude, setSourceLongitude] = useState('');
+  const [destLatitude, setDestLatitude] = useState('');
+  const [destLongitude, setDestLongitude] = useState('');
+
+  // State for storing the coordinates to draw a polyline in the map
   const [pathCoordinates, setPathCoordinates] = useState([]);
 
-  const mapRef = React.createRef(); // Reference for the MapView component
+  // Reference for the MapView component
+  const mapRef = React.createRef();
 
+  // Function to handle setting the location on the map based on entered latitude and longitude
   const handleSetLocation = () => {
     if (latitude && longitude) {
       const lat = parseFloat(latitude);
       const long = parseFloat(longitude);
-
       if (!isNaN(lat) && !isNaN(long)) {
         mapRef.current.animateToRegion({
           latitude: lat,
@@ -32,29 +40,37 @@ const App = () => {
     }
   };
 
+  // Function to toggle the visibility of the menu
   const toggleMenu = () => {
     setMenuExpanded(!isMenuExpanded);
+    setCoordinatesSectionExpanded(false);
+    setShowPathSectionExpanded(false);
   };
 
+  // Function to toggle the visibility of the "Set Coordinates" section
   const toggleCoordinatesSection = () => {
     setCoordinatesSectionExpanded(!isCoordinatesSectionExpanded);
+    setShowPathSectionExpanded(false);
   };
 
+  // Function to toggle the visibility of the "Show Path" section
   const toggleShowPathSection = () => {
     setShowPathSectionExpanded(!isShowPathSectionExpanded);
+    setCoordinatesSectionExpanded(false);
   };
 
+  // Function to handle showing the path on the map based on entered source and destination coordinates
   const handleShowPath = () => {
-    if (sourceLat && sourceLong && destLat && destLong) {
-      const source = { latitude: parseFloat(sourceLat), longitude: parseFloat(sourceLong) };
-      const destination = { latitude: parseFloat(destLat), longitude: parseFloat(destLong) };
+    if (sourceLatitude && sourceLongitude && destLatitude && destLongitude) {
+      const source = { latitude: parseFloat(sourceLatitude), longitude: parseFloat(sourceLongitude) };
+      const destination = { latitude: parseFloat(destLatitude), longitude: parseFloat(destLongitude) };
       setPathCoordinates([source, destination]);
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Collapsible Menu */}
+      {/* Button to Toggle the Menu */}
       <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
         <Text style={styles.menuButtonText}>Menu</Text>
       </TouchableOpacity>
@@ -62,79 +78,100 @@ const App = () => {
       {/* Expanded Menu with Additional Buttons */}
       {isMenuExpanded && (
         <View style={styles.expandedMenu}>
-          {/* Button to Toggle Coordinates Section */}
+          {/* Button to Toggle "Set Coordinates" Section */}
           <TouchableOpacity style={styles.menuButton} onPress={toggleCoordinatesSection}>
             <Text style={styles.menuButtonText}>Set Coordinates</Text>
           </TouchableOpacity>
 
-          {/* Button to Toggle Show Path Section */}
+          {/* Button to Toggle "Show Path" Section */}
           <TouchableOpacity style={styles.menuButton} onPress={toggleShowPathSection}>
             <Text style={styles.menuButtonText}>Show Path</Text>
           </TouchableOpacity>
-
-          {/* Coordinates Section */}
-          {isCoordinatesSectionExpanded && (
-            <View style={styles.coordinatesSection}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter latitude"
-                keyboardType="numeric"
-                value={latitude}
-                onChangeText={(text) => setLatitude(text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter longitude"
-                keyboardType="numeric"
-                value={longitude}
-                onChangeText={(text) => setLongitude(text)}
-              />
-              <Button title="Set Location" onPress={handleSetLocation} />
-            </View>
-          )}
-
-          {/* Show Path Section */}
-          {isShowPathSectionExpanded && (
-            <View style={styles.showPathSection}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter source latitude"
-                keyboardType="numeric"
-                value={sourceLat}
-                onChangeText={(text) => setSourceLat(text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter source longitude"
-                keyboardType="numeric"
-                value={sourceLong}
-                onChangeText={(text) => setSourceLong(text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter destination latitude"
-                keyboardType="numeric"
-                value={destLat}
-                onChangeText={(text) => setDestLat(text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter destination longitude"
-                keyboardType="numeric"
-                value={destLong}
-                onChangeText={(text) => setDestLong(text)}
-              />
-              <Button title="Make Path" onPress={handleShowPath} />
-            </View>
-          )}
         </View>
       )}
 
-      {/* MapView component with Markers and Polyline */}
-      <MapView ref={mapRef} style={styles.map} initialRegion={{latitude: 26.8467, longitude: 80.9462, latitudeDelta: 0.0922, longitudeDelta: 0.0421}}>
+      {/* "Set Coordinates" Section */}
+      {isCoordinatesSectionExpanded && (
+        <View style={styles.coordinatesSection}>
+          {/* Latitude and Longitude Inputs in the Same Line */}
+          <View style={styles.fullInputContainer}>
+            <TextInput
+              style={styles.fullInput}
+              placeholder="Enter latitude"
+              keyboardType="numeric"
+              value={latitude}
+              onChangeText={(text) => setLatitude(text)}
+            />
+            <TextInput
+              style={styles.fullInput}
+              placeholder="Enter longitude"
+              keyboardType="numeric"
+              value={longitude}
+              onChangeText={(text) => setLongitude(text)}
+            />
+          </View>
+          {/* Button to Set Location */}
+          <Button title="Set Location" onPress={handleSetLocation} />
+        </View>
+      )}
+
+      {/* "Show Path" Section */}
+      {isShowPathSectionExpanded && (
+        <View style={styles.showPathSection}>
+          {/* Source and Destination Inputs in the Same Line */}
+          <View style={styles.fullInputContainer}>
+            <TextInput
+              style={styles.fullInput}
+              placeholder="Source Latitude"
+              keyboardType="numeric"
+              value={sourceLatitude}
+              onChangeText={(text) => setSourceLatitude(text)}
+            />
+            <TextInput
+              style={styles.fullInput}
+              placeholder="Source Longitude"
+              keyboardType="numeric"
+              value={sourceLongitude}
+              onChangeText={(text) => setSourceLongitude(text)}
+            />
+          </View>
+          <View style={styles.fullInputContainer}>
+            <TextInput
+              style={styles.fullInput}
+              placeholder="Dest Latitude"
+              keyboardType="numeric"
+              value={destLatitude}
+              onChangeText={(text) => setDestLatitude(text)}
+            />
+            <TextInput
+              style={styles.fullInput}
+              placeholder="Dest Longitude"
+              keyboardType="numeric"
+              value={destLongitude}
+              onChangeText={(text) => setDestLongitude(text)}
+            />
+          </View>
+          {/* Button to Make Path */}
+          <Button title="Make Path" onPress={handleShowPath} />
+        </View>
+      )}
+
+      {/* MapView component */}
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={{
+          latitude: 26.8467,
+          longitude: 80.9462,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+      >
+        {/* Polyline to Show Path */}
         {pathCoordinates.length > 0 && (
-          <Polyline coordinates={pathCoordinates} strokeColor="#FF0000" strokeWidth={2} />
+          <Polyline coordinates={pathCoordinates} strokeWidth={2} strokeColor="red" />
         )}
+        {/* Markers for Path Coordinates */}
         {pathCoordinates.map((coordinate, index) => (
           <Marker key={index} coordinate={coordinate} title={`Marker ${index + 1}`} />
         ))}
@@ -150,12 +187,18 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  input: {
+  fullInputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  fullInput: {
     height: 40,
     borderColor: 'lightgreen',
     borderWidth: 1,
-    margin: 5,
     paddingLeft: 10,
+    flex: 1, // Adjusted size for equal spacing
+    marginRight: 10, // Spacing between input boxes
   },
   menuButton: {
     backgroundColor: 'lightgreen',
