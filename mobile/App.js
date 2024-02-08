@@ -1,24 +1,27 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, Button, TouchableOpacity, Text } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const App = () => {
   const [latitude, setLatitude] = useState(''); // State for latitude input
   const [longitude, setLongitude] = useState(''); // State for longitude input
   const [isMenuExpanded, setMenuExpanded] = useState(false);
+  const [isCoordinatesSectionExpanded, setCoordinatesSectionExpanded] = useState(false);
+  const [sourceLat, setSourceLat] = useState('');
+  const [sourceLong, setSourceLong] = useState('');
+  const [destLat, setDestLat] = useState('');
+  const [destLong, setDestLong] = useState('');
+  const [isShowPathSectionExpanded, setShowPathSectionExpanded] = useState(false);
+  const [pathCoordinates, setPathCoordinates] = useState([]);
 
   const mapRef = React.createRef(); // Reference for the MapView component
 
   const handleSetLocation = () => {
-    // Implement logic to set the map location based on entered latitude and longitude
     if (latitude && longitude) {
-      // Convert latitude and longitude to numbers
       const lat = parseFloat(latitude);
       const long = parseFloat(longitude);
 
-      // Check if lat and long are valid numbers
       if (!isNaN(lat) && !isNaN(long)) {
-        // Set the map location
         mapRef.current.animateToRegion({
           latitude: lat,
           longitude: long,
@@ -33,6 +36,22 @@ const App = () => {
     setMenuExpanded(!isMenuExpanded);
   };
 
+  const toggleCoordinatesSection = () => {
+    setCoordinatesSectionExpanded(!isCoordinatesSectionExpanded);
+  };
+
+  const toggleShowPathSection = () => {
+    setShowPathSectionExpanded(!isShowPathSectionExpanded);
+  };
+
+  const handleShowPath = () => {
+    if (sourceLat && sourceLong && destLat && destLong) {
+      const source = { latitude: parseFloat(sourceLat), longitude: parseFloat(sourceLong) };
+      const destination = { latitude: parseFloat(destLat), longitude: parseFloat(destLong) };
+      setPathCoordinates([source, destination]);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Collapsible Menu */}
@@ -40,43 +59,86 @@ const App = () => {
         <Text style={styles.menuButtonText}>Menu</Text>
       </TouchableOpacity>
 
-      {/* Collapsible Section */}
+      {/* Expanded Menu with Additional Buttons */}
       {isMenuExpanded && (
-        <View style={styles.collapsibleSection}>
-          {/* Latitude Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Enter latitude"
-            keyboardType="numeric"
-            value={latitude}
-            onChangeText={(text) => setLatitude(text)}
-          />
+        <View style={styles.expandedMenu}>
+          {/* Button to Toggle Coordinates Section */}
+          <TouchableOpacity style={styles.menuButton} onPress={toggleCoordinatesSection}>
+            <Text style={styles.menuButtonText}>Set Coordinates</Text>
+          </TouchableOpacity>
 
-          {/* Longitude Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Enter longitude"
-            keyboardType="numeric"
-            value={longitude}
-            onChangeText={(text) => setLongitude(text)}
-          />
+          {/* Button to Toggle Show Path Section */}
+          <TouchableOpacity style={styles.menuButton} onPress={toggleShowPathSection}>
+            <Text style={styles.menuButtonText}>Show Path</Text>
+          </TouchableOpacity>
 
-          {/* Button to set location */}
-          <Button title="Set Location" onPress={handleSetLocation} />
+          {/* Coordinates Section */}
+          {isCoordinatesSectionExpanded && (
+            <View style={styles.coordinatesSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter latitude"
+                keyboardType="numeric"
+                value={latitude}
+                onChangeText={(text) => setLatitude(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter longitude"
+                keyboardType="numeric"
+                value={longitude}
+                onChangeText={(text) => setLongitude(text)}
+              />
+              <Button title="Set Location" onPress={handleSetLocation} />
+            </View>
+          )}
+
+          {/* Show Path Section */}
+          {isShowPathSectionExpanded && (
+            <View style={styles.showPathSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter source latitude"
+                keyboardType="numeric"
+                value={sourceLat}
+                onChangeText={(text) => setSourceLat(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter source longitude"
+                keyboardType="numeric"
+                value={sourceLong}
+                onChangeText={(text) => setSourceLong(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter destination latitude"
+                keyboardType="numeric"
+                value={destLat}
+                onChangeText={(text) => setDestLat(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter destination longitude"
+                keyboardType="numeric"
+                value={destLong}
+                onChangeText={(text) => setDestLong(text)}
+              />
+              <Button title="Make Path" onPress={handleShowPath} />
+            </View>
+          )}
         </View>
       )}
 
-      {/* MapView component */}
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={{
-          latitude: 26.8467,
-          longitude: 80.9462,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      />
+      {/* MapView component with Markers and Polyline */}
+      <MapView ref={mapRef} style={styles.map} initialRegion={{latitude: 26.8467, longitude: 80.9462, latitudeDelta: 0.0922, longitudeDelta: 0.0421}}>
+        {pathCoordinates.length > 0 && (
+          <Polyline coordinates={pathCoordinates} strokeColor="#FF0000" strokeWidth={2} />
+        )}
+        {pathCoordinates.map((coordinate, index) => (
+          <Marker key={index} coordinate={coordinate} title={`Marker ${index + 1}`} />
+        ))}
+      </MapView>
     </View>
   );
 };
@@ -104,9 +166,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  collapsibleSection: {
+  expandedMenu: {
     backgroundColor: 'white',
     padding: 10,
+  },
+  coordinatesSection: {
+    marginTop: 10,
+  },
+  showPathSection: {
+    marginTop: 10,
   },
 });
 
