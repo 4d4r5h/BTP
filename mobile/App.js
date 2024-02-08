@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Button } from 'react-native';
+import { StyleSheet, View, TextInput, Button, TouchableOpacity, Text } from 'react-native';
 import MapView from 'react-native-maps';
 
 const App = () => {
   const [latitude, setLatitude] = useState(''); // State for latitude input
   const [longitude, setLongitude] = useState(''); // State for longitude input
+  const [isMenuExpanded, setMenuExpanded] = useState(false);
+
+  const mapRef = React.createRef(); // Reference for the MapView component
 
   const handleSetLocation = () => {
     // Implement logic to set the map location based on entered latitude and longitude
@@ -26,30 +29,42 @@ const App = () => {
     }
   };
 
-  const mapRef = React.createRef(); // Reference for the MapView component
+  const toggleMenu = () => {
+    setMenuExpanded(!isMenuExpanded);
+  };
 
   return (
     <View style={styles.container}>
-      {/* Latitude Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Enter latitude"
-        keyboardType="numeric"
-        value={latitude}
-        onChangeText={(text) => setLatitude(text)}
-      />
+      {/* Collapsible Menu */}
+      <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
+        <Text style={styles.menuButtonText}>Menu</Text>
+      </TouchableOpacity>
 
-      {/* Longitude Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Enter longitude"
-        keyboardType="numeric"
-        value={longitude}
-        onChangeText={(text) => setLongitude(text)}
-      />
+      {/* Collapsible Section */}
+      {isMenuExpanded && (
+        <View style={styles.collapsibleSection}>
+          {/* Latitude Input */}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter latitude"
+            keyboardType="numeric"
+            value={latitude}
+            onChangeText={(text) => setLatitude(text)}
+          />
 
-      {/* Button to set location */}
-      <Button title="Set Location" onPress={handleSetLocation} />
+          {/* Longitude Input */}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter longitude"
+            keyboardType="numeric"
+            value={longitude}
+            onChangeText={(text) => setLongitude(text)}
+          />
+
+          {/* Button to set location */}
+          <Button title="Set Location" onPress={handleSetLocation} />
+        </View>
+      )}
 
       {/* MapView component */}
       <MapView
@@ -69,17 +84,29 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
   },
   map: {
     flex: 1,
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: 'lightgreen',
     borderWidth: 1,
-    margin: 10,
+    margin: 5,
     paddingLeft: 10,
+  },
+  menuButton: {
+    backgroundColor: 'lightgreen',
+    padding: 10,
+    alignItems: 'center',
+  },
+  menuButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  collapsibleSection: {
+    backgroundColor: 'white',
+    padding: 10,
   },
 });
 
