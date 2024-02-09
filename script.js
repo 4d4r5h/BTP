@@ -1,6 +1,10 @@
 window.LRM = {
   tileLayerURL: "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
   tomtomAccessToken: "jkf8G4nkI5HAHsFkJAom3KtGONAyLeuU",
+  geocodeAccessToken: "65c4d79353aba676715416qfs3ff4fc",
+  googleMapsAcessToken: "AIzaSyAZxtTN2ftb64eu3EGoYM8E9TOk1PhTxJ0",
+  routificAccessToken:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWM0ZmU3NGU1ZWU2YjAwMWI4YmQ2NjIiLCJpYXQiOjE3MDc0MDkwMTJ9.0Iif2yNAEZCC4TOCbtFR0xqhAND5FxnFPgxt704vOZo",
 };
 
 const defaultLatitude = 26.8467,
@@ -47,7 +51,7 @@ function giveLatsLngs(_waypoints) {
   return latsLngs;
 }
 
-function giveURL(options) {
+function giveTomTomURL(options) {
   const baseURL = "api.tomtom.com";
   const versionNumber = 1;
   const contentType = "json";
@@ -73,8 +77,8 @@ function giveURL(options) {
   return URL;
 }
 
-async function fetchJSON(options) {
-  let URL = giveURL(options);
+async function fetchTomTomJSON(options) {
+  let URL = giveTomTomURL(options);
   console.log(URL);
   const object = await fetch(URL);
   const json = await object.json();
@@ -101,8 +105,12 @@ function showTrafficCongestion(routeArray) {
 
     for (let i = Math.min(2, countOfRoutes - 1); i >= 0; i--) {
       const content =
-        `<b>Distance:</b> ${Math.round((routes[i].lengthInMeters/100) * 100) / 1000} km` +
-        `<br><b>Travel Time:</b> ${Math.round((routes[i].travelTimeInSeconds/60) * 100) / 100} minutes`;
+        `<b>Distance:</b> ${
+          Math.round((routes[i].lengthInMeters / 100) * 100) / 1000
+        } km` +
+        `<br><b>Travel Time:</b> ${
+          Math.round((routes[i].travelTimeInSeconds / 60) * 100) / 100
+        } minutes`;
       polylines.push(
         L.polyline(routes[i].route, {
           color: colors[i],
@@ -155,7 +163,7 @@ function showInstructions(routeArray) {
 }
 
 function doRouting(options) {
-  fetchJSON(options).then((json) => {
+  fetchTomTomJSON(options).then((json) => {
     const countOfRoutes = json.routes.length;
     const routeArray = [];
     for (let i = 0; i < countOfRoutes; i++) {
@@ -192,22 +200,201 @@ function doRouting(options) {
   });
 }
 
+function showTrafficCongestionForVRP(routeArray) {
+  const countOfRoutes = routeArray.length;
+  const countOfDestinations = 1;
+  const colors = ["green", "orange", "red"];
+
+  const content =
+    `<b>Distance:</b> ${
+      Math.round((routeArray.lengthInMeters[0] / 100) * 100) / 1000
+    } km` +
+    `<br><b>Travel Time:</b> ${
+      Math.round((routeArray.travelTimeInSeconds[0] / 60) * 100) / 100
+    } minutes`;
+  const countOfPolylines = polylines.length;
+  polylines.push(
+    L.polyline(routeArray.route, {
+      color: colors[countOfPolylines],
+    })
+      .bindTooltip(content)
+      .addTo(map)
+  );
+
+  // for (let j = 0; j < countOfDestinations; j++) {
+  //   let routes = [];
+  //   for (let i = 0; i < countOfRoutes; i++) {
+  //     routes.push({
+  //       travelTimeInSeconds: routeArray[i].travelTimeInSeconds[j],
+  //       lengthInMeters: routeArray[i].lengthInMeters[j],
+  //       route: routeArray[i].route[j],
+  //     });
+  //   }
+  // routes.sort((object1, object2) => {
+  //   return object1.travelTimeInSeconds - object2.travelTimeInSeconds;
+  // });
+
+  // for (let i = Math.min(2, countOfRoutes - 1); i >= 0; i--) {
+  //   const content =
+  //     `<b>Distance:</b> ${
+  //       Math.round((routes[i].lengthInMeters / 100) * 100) / 1000
+  //     } km` +
+  //     `<br><b>Travel Time:</b> ${
+  //       Math.round((routes[i].travelTimeInSeconds / 60) * 100) / 100
+  //     } minutes`;
+  //     const countOfPolylines = polylines.length;
+  //   polylines.push(
+  //     L.polyline(routes[i].route, {
+  //       color: colors[countOfPolylines],
+  //     })
+  //       .bindTooltip(content)
+  //       .addTo(map)
+  //   );
+  // }
+}
+
+function doRoutingForVRP(options) {
+  fetchTomTomJSON(options).then((json) => {
+    const countOfRoutes = json.routes.length;
+    const routeArray = [];
+    for (let i = 0; i < countOfRoutes; i++) {
+      const legs = json.routes[i].legs;
+      const guidance = json.routes[i].guidance;
+      const countOfDestinations = legs.length;
+      const countOfInstructions = guidance.instructions.length;
+      let route = [];
+      let instructions = { messages: [] };
+      let travelTimeInSeconds = [];
+      let lengthInMeters = [];
+      for (let j = 0; j < countOfDestinations; j++) {
+        const points = legs[j].points.map((object) => {
+          return [object.latitude, object.longitude];
+        });
+        for (let point of points) {
+          route.push(point);
+        }
+      }
+      for (let j = 0; j < countOfInstructions; j++) {
+        const message = guidance.instructions[j].message;
+        instructions.messages.push(message);
+      }
+      travelTimeInSeconds.push(json.routes[i].summary.travelTimeInSeconds);
+      lengthInMeters.push(json.routes[i].summary.lengthInMeters);
+      routeArray[i] = {
+        index: i,
+        travelTimeInSeconds: travelTimeInSeconds,
+        lengthInMeters: lengthInMeters,
+        route: route,
+        instructions: instructions,
+      };
+      console.log(routeArray[i]);
+      showTrafficCongestionForVRP(routeArray[i]);
+    }
+    // showInstructions(routeArray);
+  });
+}
+
+function giveRoutificData(options) {
+  const visits = {};
+  const fleet = {};
+  const countOfVehicles = 3;
+  const _waypoints = [];
+
+  for (coordinate of waypoints) {
+    if (coordinate !== null) _waypoints.push(coordinate);
+  }
+
+  for (let i = 1; i < _waypoints.length; i++) {
+    visits[`order_${i}`] = {
+      location: _waypoints[i],
+    };
+  }
+  for (let i = 0; i < countOfVehicles; i++) {
+    fleet[`vehicle_${i + 1}`] = {
+      start_location: _waypoints[0],
+    };
+  }
+
+  const data = {
+    visits: visits,
+    fleet: fleet,
+    options: options,
+  };
+  return data;
+}
+
+async function fetchRoutificJSON(options) {
+  const API_KEY = LRM.routificAccessToken;
+  let URL = "https://api.routific.com/v1/vrp";
+  const data = giveRoutificData(options);
+  const object = await fetch(URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `bearer ${API_KEY}`,
+    },
+    body: JSON.stringify(data),
+  });
+  const json = await object.json();
+  return { json: json, data: data };
+}
+
+function doVRP(options) {
+  fetchRoutificJSON(options).then((object) => {
+    const json = object.json;
+    const data = object.data;
+    if (json.status === "success") {
+      const allVehicles = json.solution;
+      for (let vehicle in allVehicles) {
+        const _waypoints = [];
+        for (let path of allVehicles[vehicle]) {
+          let name = path.location_name;
+          if (name.endsWith("_start"))
+            name = name.substring(0, name.indexOf("_start"));
+          let coordinate;
+          for (let vehicle in data.fleet) {
+            if (vehicle == name) {
+              coordinate = data.fleet[vehicle].start_location;
+            }
+          }
+          for (let order in data.visits) {
+            if (order == name) {
+              coordinate = data.visits[order].location;
+            }
+          }
+          _waypoints.push(coordinate);
+        }
+        if (_waypoints.length > 1) {
+          doRoutingForVRP({
+            routePlanningLocations: _waypoints,
+            instructionsType: "tagged",
+          });
+        }
+      }
+    }
+  });
+}
+
 function routing() {
   clearPolylines();
   clearOutputTextBox();
   if (effectiveLengthOfWaypoints > 1) {
-    doRouting({
-      maxAlternatives: 2,
-      instructionsType: "tagged",
-    });
+    // doRouting({
+    //   maxAlternatives: 2,
+    //   instructionsType: "tagged",
+    // });
+    doVRP({});
   }
 }
 
 async function geocode(coordinate) {
   const latitude = coordinate.lat;
   const longitude = coordinate.lng;
-  const URL = `https://geocode.maps.co/reverse?lat=${latitude}&lon=${longitude}`;
-  const object = await fetch(URL);
+  const API_KEY = LRM.geocodeAccessToken;
+  const URL = `https://geocode.maps.co/reverse?lat=${latitude}&lon=${longitude}&api_key=${API_KEY}`;
+  const object = await fetch(URL, {
+    mode: "cors",
+  });
   const json = await object.json();
   return json;
 }
@@ -326,7 +513,7 @@ map.on("click", (e) => {
 });
 
 document.getElementById("add_label_button").addEventListener("click", () => {
-  window.location.href = "/BTP/add_label.html";
+  window.location.href = "add_label.html";
 });
 
 document.getElementById("recenter_button").addEventListener("click", () => {
