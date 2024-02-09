@@ -31,24 +31,11 @@ const App = () => {
   // State for the selected place from the search results
   const [selectedPlace, setSelectedPlace] = useState(null);
 
+  // State to track whether "Add Marker" mode is active
+  const [addMarkerMode, setAddMarkerMode] = useState(false);
+
   // Reference for the MapView component
   const mapRef = React.createRef();
-
-  // Function to handle setting the location on the map based on entered latitude and longitude
-  const handleSetLocation = () => {
-    if (latitude && longitude) {
-      const lat = parseFloat(latitude);
-      const long = parseFloat(longitude);
-      if (!isNaN(lat) && !isNaN(long)) {
-        mapRef.current.animateToRegion({
-          latitude: lat,
-          longitude: long,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        });
-      }
-    }
-  };
 
   // Function to toggle the visibility of the menu
   const toggleMenu = () => {
@@ -77,6 +64,31 @@ const App = () => {
     setSearchPlaceSectionExpanded(!isSearchPlaceSectionExpanded);
     setCoordinatesSectionExpanded(false);
     setShowPathSectionExpanded(false);
+  };
+
+  // Function to handle map press and add marker when in "Add Marker" mode
+  const handleMapPress = (event) => {
+    if (addMarkerMode) {
+      const { coordinate } = event.nativeEvent;
+      const newMarker = { latitude: coordinate.latitude, longitude: coordinate.longitude };
+      setPathCoordinates([...pathCoordinates, newMarker]);
+    }
+  };
+
+  // Function to handle setting the location on the map based on entered latitude and longitude
+  const handleSetLocation = () => {
+    if (latitude && longitude) {
+      const lat = parseFloat(latitude);
+      const long = parseFloat(longitude);
+      if (!isNaN(lat) && !isNaN(long)) {
+        mapRef.current.animateToRegion({
+          latitude: lat,
+          longitude: long,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        });
+      }
+    }
   };
 
   // Function to handle showing the path on the map based on entered source and destination coordinates
@@ -264,15 +276,19 @@ const App = () => {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-        >
+        onPress={handleMapPress}
+        // Add this line to handle map press
+      >
         {/* Polyline to Show Path */}
         {pathCoordinates.length > 0 && (
           <Polyline coordinates={pathCoordinates} strokeWidth={2} strokeColor="red" />
         )}
+
         {/* Markers for Path Coordinates */}
         {pathCoordinates.map((coordinate, index) => (
           <Marker key={index} coordinate={coordinate} title={`Marker ${index + 1}`} />
         ))}
+
         {/* Marker for Selected Place */}
         {selectedPlace && selectedPlace.lat && selectedPlace.lon && (
           <Marker
