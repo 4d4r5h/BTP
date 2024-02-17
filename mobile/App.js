@@ -58,6 +58,7 @@ const App = () => {
 
     setMarkers((prevMarkers) => {
       console.log('New Marker:', newMarker); // Log the new marker
+      // dummyRouting([...prevMarkers, newMarker]);
       setPathCoordinates([...pathCoordinates, coordinate]);
       return [...prevMarkers, newMarker];
     });
@@ -145,6 +146,7 @@ const App = () => {
     };
 
     setMarkers([...markers, newMarker]);
+    // dummyRouting([...markers, newMarker]);
     setPathCoordinates([...pathCoordinates, newMarker.coordinate]);
 
     // Hide the search results area after selecting a place
