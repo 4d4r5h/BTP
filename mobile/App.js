@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Alert, TouchableOpacity, Text, TextInput, Button, FlatList } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapWithMarkers from './MapWithMarkers'; // Import MapWithMarkers component
+import ResetButton from './ResetButton'; // Import ResetButton component
+import SearchBar from './SearchBar'; // Import SearchBar component
+import SearchResultList from './SearchResultList'; // Import SearchResultList component
 
 const App = () => {
   // Default coordinates for the initial map region
@@ -43,37 +46,28 @@ const App = () => {
 
   // Handle the press event on the map to add a new marker
   const handleMapPress = (event) => {
-    // Extract coordinates from the pressed event
     const { coordinate } = event.nativeEvent;
-
-    // Create a new marker with a unique ID and coordinates
     const newMarker = {
       id: markers.length,
       coordinate: coordinate,
       title: `Marker ${markers.length}`,
     };
 
-    // Update the state using the callback function to log the updated state
     setMarkers((prevMarkers) => {
-      console.log('New Marker:', newMarker);
-      
-      // Update the path coordinates
+      console.log('New Marker:', newMarker); // Log the new marker
       setPathCoordinates([...pathCoordinates, coordinate]);
-
       return [...prevMarkers, newMarker];
     });
   };
 
   // Handle the press event on a marker to show an alert
   const handleMarkerPress = (marker) => {
-    // Show an alert with information about the pressed marker
     Alert.alert('Marker Pressed', `You clicked on ${marker.title}`);
     console.log('Marker Pressed', `You clicked on ${marker.title}`);
   };
 
   // Handle the press event on the reset button
   const handleResetPress = () => {
-    // Reset the markers and path coordinates to the initial state
     setMarkers([defaultMarker]);
     setPathCoordinates([
       {
@@ -81,31 +75,46 @@ const App = () => {
         longitude: defaultCoordinates.longitude,
       },
     ]);
-    mapRef.current.animateToRegion(defaultCoordinates);
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(defaultCoordinates);
+    }
+
     console.log('Reset button pressed!');
   };
 
   // Handle the search for a place by name
-  const handleSearchPlace = async () => {
-    if (searchQuery) {
+  const handleSearchPlace = async (query) => {
+    // Check if there is a valid search query
+    if (query.trim() !== '') {
       try {
+        // Construct the API URL for geocoding with the search query
         const response = await fetch(
-          `https://geocode.maps.co/search?q=${encodeURIComponent(searchQuery)}&api_key=65c44417e0aca565166909xnt731e24`
+          `https://geocode.maps.co/search?q=${encodeURIComponent(query)}&api_key=65c44417e0aca565166909xnt731e24`
         );
+
+        // Parse the response into JSON format
         const result = await response.json();
 
-        console.log('Results:', result);
+        // Log the raw result to the console for debugging purposes
+        console.log('Raw Result:', result);
 
+        // Check if there are results and update the state with the search results
         if (result && result.length > 0) {
+          // Update the state with the search results
           setSearchResults(result);
         } else {
+          // If no results are found, reset the search results state
           setSearchResults([]);
-          // Handle case where no results are found
           console.error('No results found for the search query');
         }
       } catch (error) {
+        // Handle any errors that occur during the fetch or parsing process
         console.error('Error searching for a place:', error);
       }
+    } else {
+      // Handle the case where the search query is empty
+      console.warn('Empty search query. Please enter a place name.');
     }
   };
 
@@ -123,7 +132,10 @@ const App = () => {
     setMarkers([...markers, newMarker]);
     setPathCoordinates([...pathCoordinates, newMarker.coordinate]);
     setSearchResults([]);
-    mapRef.current.animateToRegion(newMarker.coordinate);
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(newMarker.coordinate);
+    }
   };
 
   // Render function for the search results flat list
@@ -138,97 +150,29 @@ const App = () => {
 
   return (
     <View style={styles.container}>
-      {/* MapView component */}
-      <MapView
-        ref={mapRef}
-        style={styles.map}
+      {/* MapWithMarkers component */}
+      <MapWithMarkers
+        markers={markers}
+        pathCoordinates={pathCoordinates}
+        onMapPress={handleMapPress}
+        onMarkerPress={handleMarkerPress}
         initialRegion={defaultCoordinates}
-        onPress={handleMapPress} // Call handleMapPress function on map press
-      >
-        {/* Display markers on the map */}
-        {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            coordinate={marker.coordinate}
-            title={marker.title}
-            onPress={() => handleMarkerPress(marker)} // Call handleMarkerPress function on marker press
-          />
-        ))}
-
-        {/* Display polyline for the path between markers */}
-        {pathCoordinates.length > 1 && (
-          <Polyline
-            coordinates={pathCoordinates}
-            strokeWidth={2}
-            strokeColor="blue"
-          />
-        )}
-      </MapView>
-
-      {/* Reset button */}
-      <TouchableOpacity style={styles.resetButton} onPress={handleResetPress}>
-        <Text style={styles.resetButtonText}>Reset</Text>
-      </TouchableOpacity>
-
-      {/* Search Bar and Button */}
-      <View style={styles.searchBarContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search Place"
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-        />
-        <Button title="Search" onPress={handleSearchPlace} />
-      </View>
-
-      {/* FlatList to Display Search Results */}
-      <FlatList
-        data={searchResults}
-        renderItem={renderSearchResult}
-        keyExtractor={(item) => item.place_id}
-        style={styles.searchResultsList}
+        mapRef={mapRef}
       />
+
+      {/* ResetButton component */}
+      <ResetButton onReset={handleResetPress} />
+
+      {/* SearchBar and SearchResultList components */}
+      <SearchBar onSearch={handleSearchPlace} />
+      <SearchResultList data={searchResults} onSelect={handleSelectPlace} />
     </View>
   );
 };
 
-// Stylesheet
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-  resetButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    backgroundColor: 'red',
-    padding: 12,
-    borderRadius: 8,
-  },
-  resetButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  searchBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: 'white',
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginRight: 10,
-    paddingLeft: 10,
-  },
-  searchResultsList: {
-    marginTop: 10,
   },
   searchResultItem: {
     padding: 10,
