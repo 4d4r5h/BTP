@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Alert } from 'react-native';
+import { StyleSheet, View, Alert, TouchableOpacity, Text } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const App = () => {
@@ -25,10 +25,12 @@ const App = () => {
   const [markers, setMarkers] = useState([defaultMarker]);
 
   // State to manage the path coordinates
-  const [pathCoordinates, setPathCoordinates] = useState([{
-    latitude: defaultCoordinates.latitude,
-    longitude: defaultCoordinates.longitude,
-  }]);
+  const [pathCoordinates, setPathCoordinates] = useState([
+    {
+      latitude: defaultCoordinates.latitude,
+      longitude: defaultCoordinates.longitude,
+    },
+  ]);
 
   // Handle the press event on the map to add a new marker
   const handleMapPress = (event) => {
@@ -45,7 +47,7 @@ const App = () => {
     // Update the state using the callback function to log the updated state
     setMarkers((prevMarkers) => {
       console.log('New Marker:', newMarker);
-
+      
       // Update the path coordinates
       setPathCoordinates([...pathCoordinates, coordinate]);
 
@@ -58,6 +60,19 @@ const App = () => {
     // Show an alert with information about the pressed marker
     Alert.alert('Marker Pressed', `You clicked on ${marker.title}`);
     console.log('Marker Pressed', `You clicked on ${marker.title}`);
+  };
+
+  // Handle the press event on the reset button
+  const handleResetPress = () => {
+    // Reset the markers and path coordinates to the initial state
+    setMarkers([defaultMarker]);
+    setPathCoordinates([
+      {
+        latitude: defaultCoordinates.latitude,
+        longitude: defaultCoordinates.longitude,
+      },
+    ]);
+    console.log('Reset button pressed!');
   };
 
   return (
@@ -87,6 +102,11 @@ const App = () => {
           />
         )}
       </MapView>
+
+      {/* Reset button */}
+      <TouchableOpacity style={styles.resetButton} onPress={handleResetPress}>
+        <Text style={styles.resetButtonText}>Reset</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -99,7 +119,18 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  resetButton: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    backgroundColor: 'red',
+    padding: 12,
+    borderRadius: 8,
+  },
+  resetButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 });
 
-// Export the component
 export default App;
