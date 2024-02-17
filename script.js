@@ -297,7 +297,7 @@ function doRoutingForVRP(options) {
 function giveRoutificData(options) {
   const visits = {};
   const fleet = {};
-  const countOfVehicles = 3;
+  const countOfVehicles = 2;
   const _waypoints = [];
 
   for (coordinate of waypoints) {
