@@ -41,6 +41,9 @@ const App = () => {
   // State for search results
   const [searchResults, setSearchResults] = useState([]);
 
+  // State to control the visibility of the search results area
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
   // Reference for the MapView component
   const mapRef = useRef(null);
 
@@ -76,6 +79,15 @@ const App = () => {
       },
     ]);
 
+    // Clear the search text box
+    setSearchQuery('');
+
+    // Clear the search results
+    setSearchResults([]);
+
+    // Hide the search results area
+    setShowSearchResults(false);
+
     if (mapRef.current) {
       mapRef.current.animateToRegion(defaultCoordinates);
     }
@@ -101,6 +113,9 @@ const App = () => {
 
         // Check if there are results and update the state with the search results
         if (result && result.length > 0) {
+          // Show the search results area
+          setShowSearchResults(true);
+
           // Update the state with the search results
           setSearchResults(result);
         } else {
@@ -131,7 +146,9 @@ const App = () => {
 
     setMarkers([...markers, newMarker]);
     setPathCoordinates([...pathCoordinates, newMarker.coordinate]);
-    setSearchResults([]);
+
+    // Hide the search results area after selecting a place
+    setShowSearchResults(false);
 
     if (mapRef.current) {
       mapRef.current.animateToRegion(newMarker.coordinate);
@@ -165,7 +182,11 @@ const App = () => {
 
       {/* SearchBar and SearchResultList components */}
       <SearchBar onSearch={handleSearchPlace} />
-      <SearchResultList data={searchResults} onSelect={handleSelectPlace} />
+
+      {/* Conditional rendering of SearchResultList based on showSearchResults state */}
+      {showSearchResults && (
+        <SearchResultList data={searchResults} onSelect={handleSelectPlace} />
+      )}
     </View>
   );
 };
