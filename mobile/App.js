@@ -59,7 +59,6 @@ const App = () => {
 
     setMarkers((prevMarkers) => {
       console.log('New Marker:', newMarker); // Log the new marker
-      // dummyRouting([...prevMarkers, newMarker]);
       setPathCoordinates([...pathCoordinates, coordinate]);
       return [...prevMarkers, newMarker];
     });
@@ -163,7 +162,6 @@ const App = () => {
     };
 
     setMarkers([...markers, newMarker]);
-    // dummyRouting([...markers, newMarker]);
     setPathCoordinates([...pathCoordinates, newMarker.coordinate]);
 
     // Hide the search results area after selecting a place
@@ -172,6 +170,22 @@ const App = () => {
     if (mapRef.current) {
       mapRef.current.animateToRegion(newMarker.coordinate);
     }
+
+    // Sending request to web server
+    const waypoints = pathCoordinates;
+    const requestData = {
+      waypoints,
+      initialBatteryCharge: 12,
+      fullBatteryChargeCapacity: 50,
+      dischargingRate: 3,
+      chargingRate: 13,
+      chargingStations: [],
+    };
+
+    const endpoint = 'ENDPOINT_URL';
+
+    // Call the function to send data to the endpoint
+    sendDataToEndpoint(requestData, endpoint);
   };
 
   // Render function for the search results flat list
