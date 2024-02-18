@@ -91,6 +91,48 @@ const App = () => {
     console.log('Marker Pressed', `You clicked on ${marker.title}`);
   };
 
+  // Handle the drag end event on a marker
+  const handleMarkerDragEnd = (marker, newCoordinate) => {
+    // Find the index of the dragged marker in the markers array
+    const markerIndex = markers.findIndex((m) => m.id === marker.id);
+
+    // Update the marker's position
+    setMarkers((prevMarkers) => {
+      const updatedMarkers = [...prevMarkers];
+      updatedMarkers[markerIndex] = {
+        ...marker,
+        coordinate: newCoordinate,
+      };
+      return updatedMarkers;
+    });
+
+    // Update the pathCoordinates if needed
+    setPathCoordinates((prevPathCoordinates) => {
+      const updatedPathCoordinates = [...prevPathCoordinates];
+      updatedPathCoordinates[markerIndex] = newCoordinate;
+      return updatedPathCoordinates;
+    });
+
+    // Sending request to web server after marker drag
+    const waypoints = pathCoordinates;
+    const requestData = {
+      waypoints,
+      initialBatteryCharge: 12,
+      fullBatteryChargeCapacity: 50,
+      dischargingRate: 3,
+      chargingRate: 13,
+      chargingStations: [{
+        latitude: 25.54,
+        longitude: 84.84,
+      }],
+    };
+
+    const endpoint = 'http://10.35.13.102:3000/api';
+
+    // Call the function to send data to the endpoint
+    sendDataToEndpoint(requestData, endpoint);
+  };
+
   // Handle the press event on the reset button
   const handleResetPress = () => {
     setMarkers([defaultMarker]);
@@ -100,12 +142,6 @@ const App = () => {
         longitude: defaultCoordinates.longitude,
       },
     ]);
-
-    // Clear the search text box
-    setSearchQuery('');
-
-    // Clear the search results
-    setSearchResults([]);
 
     // Hide the search results area
     setShowSearchResults(false);
@@ -182,7 +218,7 @@ const App = () => {
     }
 
     // Sending request to web server
-    const waypoints = [...pathCoordinates, coordinate];
+    const waypoints = [...pathCoordinates, newMarker.coordinate];
     const requestData = {
       waypoints,
       initialBatteryCharge: 12,
@@ -219,6 +255,7 @@ const App = () => {
         pathCoordinates={pathCoordinates}
         onMapPress={handleMapPress}
         onMarkerPress={handleMarkerPress}
+        onMarkerDragEnd={handleMarkerDragEnd} // Pass the handleMarkerDragEnd function
         initialRegion={defaultCoordinates}
         mapRef={mapRef}
       />

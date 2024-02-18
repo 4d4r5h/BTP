@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
-const MapWithMarkers = ({ markers, pathCoordinates, onMapPress, onMarkerPress, initialRegion, mapRef }) => {
+const MapWithMarkers = ({ markers, pathCoordinates, onMapPress, onMarkerPress, onMarkerDragEnd, initialRegion, mapRef }) => {
   return (
     <View style={{ flex: 1 }}>
       <MapView
@@ -17,6 +17,8 @@ const MapWithMarkers = ({ markers, pathCoordinates, onMapPress, onMarkerPress, i
             key={marker.id}
             coordinate={marker.coordinate}
             title={marker.title}
+            draggable={true} // Set draggable to true
+            onDragEnd={(e) => onMarkerDragEnd(marker, e.nativeEvent.coordinate)} // Handle drag end event
             onPress={() => onMarkerPress(marker)} // Call onMarkerPress function on marker press
           />
         ))}
