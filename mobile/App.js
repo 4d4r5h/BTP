@@ -74,7 +74,7 @@ const App = () => {
       chargingStations: [],
     };
 
-    const endpoint = 'ENDPOINT_URL';
+    const endpoint = 'http://10.35.13.102:3000/api';
 
     // Call the function to send data to the endpoint
     sendDataToEndpoint(requestData, endpoint);
@@ -168,7 +168,12 @@ const App = () => {
     setShowSearchResults(false);
 
     if (mapRef.current) {
-      mapRef.current.animateToRegion(newMarker.coordinate);
+      mapRef.current.animateToRegion({
+        latitude: newMarker.coordinate.latitude,
+        longitude: newMarker.coordinate.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
     }
 
     // Sending request to web server
@@ -182,7 +187,7 @@ const App = () => {
       chargingStations: [],
     };
 
-    const endpoint = 'ENDPOINT_URL';
+    const endpoint = 'http://10.35.13.102:3000/api';
 
     // Call the function to send data to the endpoint
     sendDataToEndpoint(requestData, endpoint);
