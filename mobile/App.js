@@ -4,6 +4,7 @@ import MapWithMarkers from './MapWithMarkers'; // Import MapWithMarkers componen
 import ResetButton from './ResetButton'; // Import ResetButton component
 import SearchBar from './SearchBar'; // Import SearchBar component
 import SearchResultList from './SearchResultList'; // Import SearchResultList component
+import { sendDataToEndpoint } from './sendDataToEndpoint';
 
 const App = () => {
   // Default coordinates for the initial map region
@@ -62,6 +63,22 @@ const App = () => {
       setPathCoordinates([...pathCoordinates, coordinate]);
       return [...prevMarkers, newMarker];
     });
+
+    // Sending request to web server
+    const waypoints = pathCoordinates;
+    const requestData = {
+      waypoints,
+      initialBatteryCharge: 12,
+      fullBatteryChargeCapacity: 50,
+      dischargingRate: 3,
+      chargingRate: 13,
+      chargingStations: [],
+    };
+
+    const endpoint = 'ENDPOINT_URL';
+
+    // Call the function to send data to the endpoint
+    sendDataToEndpoint(requestData, endpoint);
   };
 
   // Handle the press event on a marker to show an alert
