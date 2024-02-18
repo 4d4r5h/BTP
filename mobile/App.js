@@ -4,7 +4,8 @@ import MapWithMarkers from './MapWithMarkers'; // Import MapWithMarkers componen
 import ResetButton from './ResetButton'; // Import ResetButton component
 import SearchBar from './SearchBar'; // Import SearchBar component
 import SearchResultList from './SearchResultList'; // Import SearchResultList component
-import { sendDataToEndpoint } from './sendDataToEndpoint';
+import StartButton from './StartButton'; // Import StartButton component
+import { sendDataToEndpoint } from './sendDataToEndpoint'; // Import sendDataToEndpoint function
 
 const App = () => {
   // Default coordinates for the initial map region
@@ -224,6 +225,9 @@ const App = () => {
 
       {/* ResetButton component */}
       <ResetButton onReset={handleResetPress} />
+
+      {/* StartButton component */}
+      <StartButton markers={markers} />
 
       {/* SearchBar and SearchResultList components */}
       <SearchBar onSearch={handleSearchPlace} />
