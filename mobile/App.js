@@ -64,14 +64,18 @@ const App = () => {
     });
 
     // Sending request to web server
-    const waypoints = pathCoordinates;
+    const waypoints = [...pathCoordinates, coordinate];
+    console.log(waypoints);
     const requestData = {
       waypoints,
       initialBatteryCharge: 12,
       fullBatteryChargeCapacity: 50,
       dischargingRate: 3,
       chargingRate: 13,
-      chargingStations: [],
+      chargingStations: [{
+        latitude: 25.54,
+        longitude: 84.84,
+      }],
     };
 
     const endpoint = 'http://10.35.13.102:3000/api';
@@ -177,14 +181,17 @@ const App = () => {
     }
 
     // Sending request to web server
-    const waypoints = pathCoordinates;
+    const waypoints = [...pathCoordinates, coordinate];
     const requestData = {
       waypoints,
       initialBatteryCharge: 12,
       fullBatteryChargeCapacity: 50,
       dischargingRate: 3,
       chargingRate: 13,
-      chargingStations: [],
+      chargingStations: [{
+        latitude: 25.54,
+        longitude: 84.84,
+      }],
     };
 
     const endpoint = 'http://10.35.13.102:3000/api';
