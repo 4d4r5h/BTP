@@ -1,27 +1,28 @@
 // sendDataToEndpoint.js
 
-const sendDataToEndpoint = async (data, endpoint) => {
+const sendDataToEndpoint = async (requestData, endpoint) => {
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(requestData),
       });
   
       if (!response.ok) {
-        throw new Error('Failed to send data to the endpoint');
+        throw new Error(`Failed to send request data to the endpoint. HTTP status code: ${response.status}`);
       }
       else {
-        console.log('Data successfully sent to the endpoint!');
+        console.log('Request data successfully sent to the endpoint!');
       }
   
       const result = await response.json();
       console.log('Response from endpoint:', result);
       return result;
     } catch (error) {
-      console.error('Error sending data to the endpoint:', error);
+      console.error('Error sending request data to the endpoint:', error);
+      throw error; // rethrow the error to be caught in the calling function
     }
 };
   

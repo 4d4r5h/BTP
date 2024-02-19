@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, View, Alert, TouchableOpacity, Text, TextInput, Button, FlatList } from 'react-native';
+import { StyleSheet, View, Alert, TouchableOpacity, Text } from 'react-native';
 import MapWithMarkers from './MapWithMarkers'; // Import MapWithMarkers component
 import ResetButton from './ResetButton'; // Import ResetButton component
 import SearchBar from './SearchBar'; // Import SearchBar component
@@ -29,13 +29,16 @@ const App = () => {
   // State to manage markers on the map
   const [markers, setMarkers] = useState([defaultMarker]);
 
-  // State to manage the path coordinates
-  const [pathCoordinates, setPathCoordinates] = useState([
+  // State to manage the way points
+  const [wayPoints, setWayPoints] = useState([
     {
       latitude: defaultCoordinates.latitude,
       longitude: defaultCoordinates.longitude,
     },
   ]);
+
+  // State to manage the path coordinates shown on map
+  const [pathCoordinates, setPathCoordinates] = useState([]);
 
   // State for search results
   const [searchResults, setSearchResults] = useState([]);
@@ -51,10 +54,22 @@ const App = () => {
     try {
       // Extracting the coordinate from the event
       const { coordinate } = event.nativeEvent;
-  
+
+      // Update the markers and pathCoordinates
+      setMarkers((prevMarkers) => {
+        const newMarker = {
+          id: prevMarkers.length,
+          coordinate: coordinate,
+          title: `Marker ${prevMarkers.length}`,
+        };
+        console.log('New Marker in Map Press:', newMarker);
+        return [...prevMarkers, newMarker];
+      });
+
+      setWayPoints([...wayPoints, coordinate]);
       // Prepare data to be sent to the server
       const requestData = {
-        waypoints: [...pathCoordinates, coordinate],
+        waypoints: [...wayPoints, coordinate],
         initialBatteryCharge: 1200,
         fullBatteryChargeCapacity: 5000,
         dischargingRate: 0.3,
@@ -83,20 +98,9 @@ const App = () => {
       if (response && response.path !== undefined) {
         // Extract the 'path' property from the response
         const responsePath = response.path;
-        console.log('Response path:', responsePath);
-  
-        // Update the markers and pathCoordinates
-        setMarkers((prevMarkers) => {
-          const newMarker = {
-            id: prevMarkers.length,
-            coordinate: coordinate,
-            title: `Marker ${prevMarkers.length}`,
-          };
-  
-          console.log('New Marker:', newMarker);
-          setPathCoordinates(responsePath);
-          return [...prevMarkers, newMarker];
-        });
+        console.log('Response path in Map Press:', responsePath);
+
+        setPathCoordinates(responsePath);
       } else {
         // Handle the case where the response is invalid or missing the 'path' property
         console.error('Invalid response format.');
@@ -114,51 +118,79 @@ const App = () => {
   };
 
   // Handle the drag end event on a marker
-  const handleMarkerDragEnd = (marker, newCoordinate) => {
-    // Find the index of the dragged marker in the markers array
-    const markerIndex = markers.findIndex((m) => m.id === marker.id);
+  const handleMarkerDragEnd = async (marker, newCoordinate) => {
+    try {
+      // Find the index of the dragged marker in the markers array
+      const markerIndex = markers.findIndex((m) => m.id === marker.id);
 
-    // Update the marker's position
-    setMarkers((prevMarkers) => {
-      const updatedMarkers = [...prevMarkers];
-      updatedMarkers[markerIndex] = {
-        ...marker,
-        coordinate: newCoordinate,
+      // Update the marker's position
+      setMarkers((prevMarkers) => {
+        const updatedMarkers = [...prevMarkers];
+        updatedMarkers[markerIndex] = {
+          ...marker,
+          coordinate: newCoordinate,
+        };
+        return updatedMarkers;
+      });
+
+      console.log('Earlier Waypoints:', wayPoints);
+
+      // Update the wayPoints
+      let updatedWayPoints = [...wayPoints];
+      updatedWayPoints[markerIndex] = newCoordinate;
+      setWayPoints((prevWayPoints) => {
+        return updatedWayPoints;
+      })
+
+      console.log('Updated Waypoints:', updatedWayPoints);
+
+      // Sending request to web server after marker drag
+      const requestData = {
+        waypoints: updatedWayPoints,
+        initialBatteryCharge: 1200,
+        fullBatteryChargeCapacity: 5000,
+        dischargingRate: 0.3,
+        chargingRate: 13,
+        chargingStations: [{
+          latitude: 25.54,
+          longitude: 84.84,
+        }],
       };
-      return updatedMarkers;
-    });
 
-    // Update the pathCoordinates if needed
-    setPathCoordinates((prevPathCoordinates) => {
-      const updatedPathCoordinates = [...prevPathCoordinates];
-      updatedPathCoordinates[markerIndex] = newCoordinate;
-      return updatedPathCoordinates;
-    });
+      const endpoint = 'http://10.35.13.102:3000/api';
 
-    // Sending request to web server after marker drag
-    const waypoints = pathCoordinates;
-    const requestData = {
-      waypoints,
-      initialBatteryCharge: 1200,
-      fullBatteryChargeCapacity: 5000,
-      dischargingRate: 0.3,
-      chargingRate: 13,
-      chargingStations: [{
-        latitude: 25.54,
-        longitude: 84.84,
-      }],
-    };
+      let response;
+      try {
+        // Call the function to send data to the endpoint
+        response = await sendDataToEndpoint(requestData, endpoint);
+      } catch (error) {
+        // Handle errors that may occur during the data sending process
+        console.error('Error in sendDataToEndpoint:', error);
+        throw new Error('Error in sendDataToEndpoint');
+      }
 
-    const endpoint = 'http://10.35.13.102:3000/api';
+      // Ensure that 'path' property exists in the response
+      if (response && response.path !== undefined) {
+        // Extract the 'path' property from the response
+        const responsePath = response.path;
+        console.log('Response path in Marker Drag:', responsePath);
 
-    // Call the function to send data to the endpoint
-    sendDataToEndpoint(requestData, endpoint);
+        setPathCoordinates(responsePath);
+      } else {
+        // Handle the case where the response is invalid or missing the 'path' property
+        console.error('Invalid response format.');
+      }
+    } catch (error) {
+      // Handle unexpected errors during the marker drag handling
+      console.error('Error in handleMarkerDragEnd:', error);
+    }
   };
 
   // Handle the press event on the reset button
   const handleResetPress = () => {
     setMarkers([defaultMarker]);
-    setPathCoordinates([
+    setPathCoordinates([]);
+    setWayPoints([
       {
         latitude: defaultCoordinates.latitude,
         longitude: defaultCoordinates.longitude,
@@ -214,49 +246,72 @@ const App = () => {
   };
 
   // Handle selecting a place from the search results
-  const handleSelectPlace = (place) => {
+  const handleSelectPlace = async (place) => {
+    try {
     const newMarker = {
-      id: markers.length,
-      coordinate: {
-        latitude: parseFloat(place.lat),
-        longitude: parseFloat(place.lon),
-      },
-      title: place.display_name,
-    };
+        id: markers.length,
+        coordinate: {
+          latitude: parseFloat(place.lat),
+          longitude: parseFloat(place.lon),
+        },
+        title: place.display_name,
+      };
 
-    setMarkers([...markers, newMarker]);
-    setPathCoordinates([...pathCoordinates, newMarker.coordinate]);
+      setMarkers([...markers, newMarker]);
 
-    // Hide the search results area after selecting a place
-    setShowSearchResults(false);
+      // Hide the search results area after selecting a place
+      setShowSearchResults(false);
 
-    if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: newMarker.coordinate.latitude,
-        longitude: newMarker.coordinate.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: newMarker.coordinate.latitude,
+          longitude: newMarker.coordinate.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        });
+      }
+
+      setWayPoints([...wayPoints, newMarker.coordinate]);
+      // Sending request to web server
+      const requestData = {
+        waypoints: [...wayPoints, newMarker.coordinate],
+        initialBatteryCharge: 1200,
+        fullBatteryChargeCapacity: 5000,
+        dischargingRate: 0.3,
+        chargingRate: 13,
+        chargingStations: [{
+          latitude: 25.54,
+          longitude: 84.84,
+        }],
+      };
+
+      const endpoint = 'http://10.35.13.102:3000/api';
+
+      let response;
+      try {
+        // Call the function to send data to the endpoint
+        response = await sendDataToEndpoint(requestData, endpoint);
+      } catch (error) {
+        // Handle errors that may occur during the data sending process
+        console.error('Error in sendDataToEndpoint:', error);
+        throw new Error('Error in sendDataToEndpoint');
+      }
+
+      // Ensure that 'path' property exists in the response
+      if (response && response.path !== undefined) {
+        // Extract the 'path' property from the response
+        const responsePath = response.path;
+        console.log('Response path in Select Place:', responsePath);
+
+        setPathCoordinates(responsePath);
+      } else {
+        // Handle the case where the response is invalid or missing the 'path' property
+        console.error('Invalid response format.');
+      }
+    } catch (error) {
+      // Handle unexpected errors during the select place handling
+      console.error('Error in handleSelectPlace:', error);
     }
-
-    // Sending request to web server
-    const waypoints = [...pathCoordinates, newMarker.coordinate];
-    const requestData = {
-      waypoints,
-      initialBatteryCharge: 1200,
-      fullBatteryChargeCapacity: 5000,
-      dischargingRate: 0.3,
-      chargingRate: 13,
-      chargingStations: [{
-        latitude: 25.54,
-        longitude: 84.84,
-      }],
-    };
-
-    const endpoint = 'http://10.35.13.102:3000/api';
-
-    // Call the function to send data to the endpoint
-    sendDataToEndpoint(requestData, endpoint);
   };
 
   // Render function for the search results flat list
