@@ -19,6 +19,7 @@ const sendDataToEndpoint = async (data, endpoint) => {
   
       const result = await response.json();
       console.log('Response from endpoint:', result);
+      return result;
     } catch (error) {
       console.error('Error sending data to the endpoint:', error);
     }

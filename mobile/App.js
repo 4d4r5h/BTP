@@ -37,9 +37,6 @@ const App = () => {
     },
   ]);
 
-  // State for search query in the "Search Place" section
-  const [searchQuery, setSearchQuery] = useState('');
-
   // State for search results
   const [searchResults, setSearchResults] = useState([]);
 
@@ -50,39 +47,64 @@ const App = () => {
   const mapRef = useRef(null);
 
   // Handle the press event on the map to add a new marker
-  const handleMapPress = (event) => {
-    const { coordinate } = event.nativeEvent;
-    const newMarker = {
-      id: markers.length,
-      coordinate: coordinate,
-      title: `Marker ${markers.length}`,
-    };
-
-    setMarkers((prevMarkers) => {
-      console.log('New Marker:', newMarker); // Log the new marker
-      setPathCoordinates([...pathCoordinates, coordinate]);
-      return [...prevMarkers, newMarker];
-    });
-
-    // Sending request to web server
-    const waypoints = [...pathCoordinates, coordinate];
-    console.log(waypoints);
-    const requestData = {
-      waypoints,
-      initialBatteryCharge: 12,
-      fullBatteryChargeCapacity: 50,
-      dischargingRate: 3,
-      chargingRate: 13,
-      chargingStations: [{
-        latitude: 25.54,
-        longitude: 84.84,
-      }],
-    };
-
-    const endpoint = 'http://10.35.13.102:3000/api';
-
-    // Call the function to send data to the endpoint
-    sendDataToEndpoint(requestData, endpoint);
+  const handleMapPress = async (event) => {
+    try {
+      // Extracting the coordinate from the event
+      const { coordinate } = event.nativeEvent;
+  
+      // Prepare data to be sent to the server
+      const requestData = {
+        waypoints: [...pathCoordinates, coordinate],
+        initialBatteryCharge: 1200,
+        fullBatteryChargeCapacity: 5000,
+        dischargingRate: 0.3,
+        chargingRate: 13,
+        chargingStations: [{
+          latitude: 25.54,
+          longitude: 84.84,
+        }],
+      };
+  
+      const endpoint = 'http://10.35.13.102:3000/api';
+  
+      // Use a temporary variable to store the response
+      let response;
+  
+      try {
+        // Call the function to send data to the endpoint
+        response = await sendDataToEndpoint(requestData, endpoint);
+      } catch (error) {
+        // Handle errors that may occur during the data sending process
+        console.error('Error in sendDataToEndpoint:', error);
+        throw new Error('Error in sendDataToEndpoint');
+      }
+  
+      // Ensure that 'path' property exists in the response
+      if (response && response.path !== undefined) {
+        // Extract the 'path' property from the response
+        const responsePath = response.path;
+        console.log('Response path:', responsePath);
+  
+        // Update the markers and pathCoordinates
+        setMarkers((prevMarkers) => {
+          const newMarker = {
+            id: prevMarkers.length,
+            coordinate: coordinate,
+            title: `Marker ${prevMarkers.length}`,
+          };
+  
+          console.log('New Marker:', newMarker);
+          setPathCoordinates(responsePath);
+          return [...prevMarkers, newMarker];
+        });
+      } else {
+        // Handle the case where the response is invalid or missing the 'path' property
+        console.error('Invalid response format.');
+      }
+    } catch (error) {
+      // Handle unexpected errors during the map press handling
+      console.error('Error in handleMapPress:', error);
+    }
   };
 
   // Handle the press event on a marker to show an alert
@@ -117,9 +139,9 @@ const App = () => {
     const waypoints = pathCoordinates;
     const requestData = {
       waypoints,
-      initialBatteryCharge: 12,
-      fullBatteryChargeCapacity: 50,
-      dischargingRate: 3,
+      initialBatteryCharge: 1200,
+      fullBatteryChargeCapacity: 5000,
+      dischargingRate: 0.3,
       chargingRate: 13,
       chargingStations: [{
         latitude: 25.54,
@@ -221,9 +243,9 @@ const App = () => {
     const waypoints = [...pathCoordinates, newMarker.coordinate];
     const requestData = {
       waypoints,
-      initialBatteryCharge: 12,
-      fullBatteryChargeCapacity: 50,
-      dischargingRate: 3,
+      initialBatteryCharge: 1200,
+      fullBatteryChargeCapacity: 5000,
+      dischargingRate: 0.3,
       chargingRate: 13,
       chargingStations: [{
         latitude: 25.54,
