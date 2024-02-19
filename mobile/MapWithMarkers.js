@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
-const MapWithMarkers = ({ markers, pathCoordinates, onMapPress, onMarkerPress, onMarkerDragEnd, initialRegion, mapRef }) => {
+const MapWithMarkers = ({ markers, pathCoordinates, responseStations = [], onMapPress, onMarkerPress, onMarkerDragEnd, initialRegion, mapRef }) => {
   return (
     <View style={{ flex: 1 }}>
       <MapView
@@ -31,6 +31,16 @@ const MapWithMarkers = ({ markers, pathCoordinates, onMapPress, onMarkerPress, o
             strokeColor="blue"
           />
         )}
+
+        {/* Display blue markers for response stations */}
+        {responseStations.map((station, index) => (
+          <Marker
+            key={index}
+            coordinate={{ latitude: station.latitude, longitude: station.longitude }}
+            title={`Charging Station ${index + 1}`}
+            pinColor="blue"
+          />
+        ))}
       </MapView>
     </View>
   );

@@ -29,6 +29,9 @@ const App = () => {
   // State to manage markers on the map
   const [markers, setMarkers] = useState([defaultMarker]);
 
+  // State to manage charging stations on the map
+  const [responseStations, setResponseStations] = useState([]);
+
   // State to manage the way points
   const [wayPoints, setWayPoints] = useState([
     {
@@ -70,13 +73,13 @@ const App = () => {
       // Prepare data to be sent to the server
       const requestData = {
         waypoints: [...wayPoints, coordinate],
-        initialBatteryCharge: 1200,
-        fullBatteryChargeCapacity: 5000,
-        dischargingRate: 0.3,
-        chargingRate: 13,
+        initialBatteryCharge: 135,
+        fullBatteryChargeCapacity: 23000,
+        dischargingRate: 37,
+        chargingRate: 1332,
         chargingStations: [{
-          latitude: 25.54,
-          longitude: 84.84,
+          longitude:84.85785227268934,
+          latitude:25.550541461120954
         }],
       };
   
@@ -93,6 +96,29 @@ const App = () => {
         console.error('Error in sendDataToEndpoint:', error);
         throw new Error('Error in sendDataToEndpoint');
       }
+
+      // Ensure that 'stations' property exists in the response
+    if (response && response.stations !== undefined) {
+      // Extract the 'stations' property from the response
+      const stations = response.stations;
+      console.log('Response stations in Map Press:', stations);
+
+      // Update the state with response stations
+      setResponseStations(stations);
+
+      // Move the map to the first station
+      if (stations.length > 0 && mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: stations[0].latitude,
+          longitude: stations[0].longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        });
+      } else {
+        // Handle the case where the response is invalid or missing the 'stations' property
+        console.error('Invalid response format in charging stations.');
+      }
+    }
   
       // Ensure that 'path' property exists in the response
       if (response && response.path !== undefined) {
@@ -147,13 +173,13 @@ const App = () => {
       // Sending request to web server after marker drag
       const requestData = {
         waypoints: updatedWayPoints,
-        initialBatteryCharge: 1200,
-        fullBatteryChargeCapacity: 5000,
-        dischargingRate: 0.3,
-        chargingRate: 13,
+        initialBatteryCharge: 135,
+        fullBatteryChargeCapacity: 23000,
+        dischargingRate: 37,
+        chargingRate: 1332,
         chargingStations: [{
-          latitude: 25.54,
-          longitude: 84.84,
+          longitude:84.85785227268934,
+          latitude:25.550541461120954
         }],
       };
 
@@ -190,6 +216,7 @@ const App = () => {
   const handleResetPress = () => {
     setMarkers([defaultMarker]);
     setPathCoordinates([]);
+    setResponseStations([]);
     setWayPoints([
       {
         latitude: defaultCoordinates.latitude,
@@ -275,13 +302,13 @@ const App = () => {
       // Sending request to web server
       const requestData = {
         waypoints: [...wayPoints, newMarker.coordinate],
-        initialBatteryCharge: 1200,
-        fullBatteryChargeCapacity: 5000,
-        dischargingRate: 0.3,
-        chargingRate: 13,
+        initialBatteryCharge: 135,
+        fullBatteryChargeCapacity: 23000,
+        dischargingRate: 37,
+        chargingRate: 1332,
         chargingStations: [{
-          latitude: 25.54,
-          longitude: 84.84,
+          longitude:84.85785227268934,
+          latitude:25.550541461120954
         }],
       };
 
@@ -331,6 +358,7 @@ const App = () => {
         markers={markers}
         pathCoordinates={pathCoordinates}
         onMapPress={handleMapPress}
+        responseStations={responseStations} // Pass the responseStations prop
         onMarkerPress={handleMarkerPress}
         onMarkerDragEnd={handleMarkerDragEnd} // Pass the handleMarkerDragEnd function
         initialRegion={defaultCoordinates}
