@@ -2,15 +2,16 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Alert, TouchableOpacity, Text } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import MapWithMarkers from './MapWithMarkers'; // Import MapWithMarkers component
-import ResetButton from './ResetButton'; // Import ResetButton component
-import SearchBar from './SearchBar'; // Import SearchBar component
-import SearchResultList from './SearchResultList'; // Import SearchResultList component
-import StartButton from './StartButton'; // Import StartButton component
-import { sendDataToEndpoint } from './sendDataToEndpoint'; // Import sendDataToEndpoint function
+import MapWithMarkers from './MapWithMarkers';
+import ResetButton from './ResetButton';
+import SearchBar from './SearchBar';
+import SearchResultList from './SearchResultList';
+import StartButton from './StartButton';
+import { sendDataToEndpoint } from './sendDataToEndpoint';
+import DashboardButton from './DashBoardButton';
 
 const MapPage = () => {
-  const navigation = useNavigation();  // Use useNavigation hook to get navigation object
+  const navigation = useNavigation(); // Use useNavigation hook to get navigation object
   const route = useRoute();
 
   // State to manage whether the user is logged in as an admin
@@ -22,8 +23,8 @@ const MapPage = () => {
     if (params && params.isAdmin !== undefined) {
       setIsAdmin(params.isAdmin);
     }
-  }, [route]);  
-  
+  }, [route]);
+
   // Default coordinates for the initial map region
   const defaultCoordinates = {
     latitude: 25.5356,
@@ -380,25 +381,24 @@ const MapPage = () => {
         markers={markers}
         pathCoordinates={pathCoordinates}
         onMapPress={handleMapPress}
-        responseStations={responseStations} // Pass the responseStations prop
+        responseStations={responseStations}
         onMarkerPress={handleMarkerPress}
-        onMarkerDragEnd={handleMarkerDragEnd} // Pass the handleMarkerDragEnd function
+        onMarkerDragEnd={handleMarkerDragEnd}
         initialRegion={defaultCoordinates}
         mapRef={mapRef}
       />
 
-      {/* ResetButton component */}
-      <ResetButton onReset={handleResetPress} />
+      {/* Wrapper view for top center alignment */}
+      <View style={styles.topCenterWrapper}>
+        {/* Dashboard button */}
+        {isAdmin && <DashboardButton onPress={handleDashboardPress} />}
 
-      {/* Dashboard button */}
-      {isAdmin && (
-        <TouchableOpacity style={styles.dashboardButton} onPress={handleDashboardPress}>
-          <Text style={styles.buttonText}>Dashboard</Text>
-        </TouchableOpacity>
-      )}
+        {/* StartButton component */}
+        <StartButton markers={markers} />
 
-      {/* StartButton component */}
-      <StartButton markers={markers} />
+        {/* ResetButton component */}
+        <ResetButton onReset={handleResetPress} />
+      </View>
 
       {/* SearchBar and SearchResultList components */}
       <SearchBar onSearch={handleSearchPlace} />
@@ -415,20 +415,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  topCenterWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center', // Align items horizontally at the center
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    zIndex: 2,
+  },
   searchResultItem: {
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'lightgrey',
-  },
-  dashboardButton: {
-    backgroundColor: '#8e44ad', // Violet color
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
   },
 });
 
