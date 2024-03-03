@@ -1,6 +1,6 @@
 // SignupPage.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const SignupPage = () => {
@@ -37,7 +37,9 @@ const SignupPage = () => {
         secureTextEntry={true}
         onChangeText={(text) => setPassword(text)}
       />
-      <Button title="Signup" onPress={handleSignup} />
+      <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+        <Text style={styles.signupButtonText}>Signup</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -46,14 +48,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
+    backgroundColor: '#f0f0f0',
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    width: '100%',
+    borderColor: '#ccc',
     borderWidth: 1,
     marginBottom: 10,
     paddingLeft: 10,
+    backgroundColor: '#fff',
+  },
+  signupButton: {
+    backgroundColor: '#27ae60',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  signupButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

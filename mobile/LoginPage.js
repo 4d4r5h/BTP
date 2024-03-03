@@ -1,6 +1,6 @@
 // LoginPage.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 
 const LoginPage = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -19,11 +19,6 @@ const LoginPage = ({ navigation }) => {
     }
   };
 
-  const handleSignupLinkPress = () => {
-    // Navigate to the Signup page
-    navigation.navigate('Signup');
-  };
-
   return (
     <View style={styles.container}>
       <TextInput
@@ -37,10 +32,10 @@ const LoginPage = ({ navigation }) => {
         secureTextEntry={true}
         onChangeText={(text) => setPassword(text)}
       />
-      <Button title="Login" onPress={handleLogin} />
-
-      {/* "Don't have an account?" hyperlink */}
-      <TouchableOpacity onPress={handleSignupLinkPress}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.loginButtonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
         <Text style={styles.signupLink}>Don't have an account?</Text>
       </TouchableOpacity>
     </View>
@@ -51,19 +46,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
+    backgroundColor: '#f0f0f0',
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    width: '100%',
+    borderColor: '#ccc',
     borderWidth: 1,
     marginBottom: 10,
     paddingLeft: 10,
+    backgroundColor: '#fff',
+  },
+  loginButton: {
+    backgroundColor: '#3498db',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
   signupLink: {
     marginTop: 10,
-    color: 'blue',
-    textDecorationLine: 'underline',
+    color: '#3498db',
+    fontSize: 14,
   },
 });
 
