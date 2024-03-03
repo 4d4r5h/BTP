@@ -8,7 +8,7 @@ import SearchBar from './SearchBar';
 import SearchResultList from './SearchResultList';
 import StartButton from './StartButton';
 import { sendDataToEndpoint } from './sendDataToEndpoint';
-import DashboardButton from './DashBoardButton';
+import DashboardButton from './DashboardButton';
 
 const MapPage = () => {
   const navigation = useNavigation(); // Use useNavigation hook to get navigation object
@@ -251,10 +251,12 @@ const MapPage = () => {
     console.log('Reset button pressed!');
   };
 
-  // Handle the press event on the dashboard button
+  // Handle the press event on the Dashboard button
   const handleDashboardPress = () => {
-    // Show an alert when the dashboard button is pressed
+    // Show an alert when the Dashboard button is pressed
     Alert.alert('Welcome to the Dashboard', 'You have access to admin features.');
+    // Navigate to the 'Dashboard' screen
+    navigation.navigate('Dashboard');
   };
 
   // Handle the search for a place by name

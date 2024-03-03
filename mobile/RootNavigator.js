@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginPage from './LoginPage'; // Create LoginPage component
 import SignupPage from './SignupPage'; // Assuming you have a SignupPage component
 import MapPage from './MapPage'; // Create MapPage component
+import DashboardPage from './DashboardPage';
 
 const Stack = createStackNavigator();
 
@@ -15,6 +16,7 @@ const RootNavigator = () => {
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Map" component={MapPage} />
         <Stack.Screen name="Signup" component={SignupPage} />
+        <Stack.Screen name="Dashboard" component={DashboardPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );
