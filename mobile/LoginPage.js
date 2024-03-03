@@ -22,17 +22,26 @@ const LoginPage = ({ navigation }) => {
           }),
         });
 
+        if (!response.ok) {
+          Alert.alert('Failed to send data', `HTTP status code: ${response.status}`);
+          return;
+        }
+
         console.log('Login request sent to server!');
         const data = await response.json();
         console.log('Login response from server:', data);
 
-        if (data && Object.keys(data).length > 0) {
-          // Successful login
-          Alert.alert('Login Successful', 'Ready, set, go!');
-          navigation.navigate('Map', { isAdmin: isAdminTab });
+        if (data) {
+          if (!data.hasOwnProperty("error")) {
+            // Successful login
+            Alert.alert('Login Successful', 'Ready, set, go!');
+            navigation.navigate('Map', { isAdmin: isAdminTab });
+          } else {
+            Alert.alert('Login failed', data.error.message);
+          }
         } else {
           // Unsuccessful login
-          Alert.alert('Invalid credentials', 'Please try again.');
+          Alert.alert('Something went wrong', 'Please try again.');
         }
       } catch (error) {
         console.error('Error during login:', error);

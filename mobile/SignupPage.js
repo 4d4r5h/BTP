@@ -26,17 +26,26 @@ const SignupPage = () => {
           }),
         });
 
+        if (!response.ok) {
+          Alert.alert('Failed to send data', `HTTP status code: ${response.status}`);
+          return;
+        }
+
         console.log('Signup request sent to server!');
         const data = await response.json();
         console.log('Signup response from server:', data);
 
-        if (data && Object.keys(data).length > 0) {
-          // Successful signup
-          Alert.alert('Signup Successful', 'Your account has been created successfully.');
-          navigation.navigate('Login');
+        if (data) {
+          if (!data.hasOwnProperty("error")) {
+            // Successful signup
+            Alert.alert('Signup Successful', 'Your account has been created successfully.');
+            navigation.navigate('Map', { isAdmin: isAdminTab });
+          } else {
+            Alert.alert('Signup failed', data.error.message);
+          }
         } else {
-          // Display an alert or error message for unsuccessful signup
-          Alert.alert('Invalid credentials', 'Please try again.');
+          // Unsuccessful login
+          Alert.alert('Something went wrong', 'Please try again.');
         }
       } catch (error) {
         console.error('Error during signup:', error);
