@@ -5,12 +5,12 @@ import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from 'reac
 const LoginPage = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isAdminTab, setIsAdminTab] = useState(false);
 
-  const endpoint = 'http://10.35.13.102:3000/login';
   const handleLogin = async () => {
     if (username.trim() !== '' && password.trim() !== '') {
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch('http://10.35.13.102:3000/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ const LoginPage = ({ navigation }) => {
           body: JSON.stringify({
             username: username,
             password: password,
-            isAdmin: false,
+            isAdmin: isAdminTab, // Set isAdmin value based on the selected tab
           }),
         });
 
@@ -44,8 +44,28 @@ const LoginPage = ({ navigation }) => {
     }
   };
 
+  const handleTabChange = (isAdminTab) => {
+    setIsAdminTab(isAdminTab);
+  };
+
   return (
     <View style={styles.container}>
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tabButton, !isAdminTab && styles.activeTab]}
+          onPress={() => handleTabChange(false)}
+        >
+          <Text style={styles.tabButtonText}>User</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabButton, isAdminTab && styles.activeTab]}
+          onPress={() => handleTabChange(true)}
+        >
+          <Text style={styles.tabButtonText}>Admin</Text>
+        </TouchableOpacity>
+      </View>
+
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -74,6 +94,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#f0f0f0',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  tabButton: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+    backgroundColor: '#ccc',
+    borderBottomWidth: 2,
+    borderBottomColor: '#fff', // Border color when inactive
+  },
+  activeTab: {
+    backgroundColor: '#3498db',
+    borderBottomColor: '#3498db', // Border color when active
+  },
+  tabButtonText: {
+    color: '#000', // Text color when inactive
   },
   input: {
     height: 40,
