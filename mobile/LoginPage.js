@@ -22,14 +22,14 @@ const LoginPage = ({ navigation }) => {
           }),
         });
 
-        console.log('Request sent to server!');
+        console.log('Login request sent to server!');
         const data = await response.json();
-        console.log('Response from server:', data);
+        console.log('Login response from server:', data);
 
         if (data && Object.keys(data).length > 0) {
           // Successful login
           Alert.alert('Login Successful', 'Ready, set, go!');
-          navigation.navigate('Map');
+          navigation.navigate('Map', { isAdmin: isAdminTab });
         } else {
           // Unsuccessful login
           Alert.alert('Invalid credentials', 'Please try again.');

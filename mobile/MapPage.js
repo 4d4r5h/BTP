@@ -1,6 +1,7 @@
 // MapPage.js
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Alert, TouchableOpacity, Text } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import MapWithMarkers from './MapWithMarkers'; // Import MapWithMarkers component
 import ResetButton from './ResetButton'; // Import ResetButton component
 import SearchBar from './SearchBar'; // Import SearchBar component
@@ -9,6 +10,20 @@ import StartButton from './StartButton'; // Import StartButton component
 import { sendDataToEndpoint } from './sendDataToEndpoint'; // Import sendDataToEndpoint function
 
 const MapPage = () => {
+  const navigation = useNavigation();  // Use useNavigation hook to get navigation object
+  const route = useRoute();
+
+  // State to manage whether the user is logged in as an admin
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  React.useEffect(() => {
+    // Access the isAdmin value from the route parameter
+    const { params } = route;
+    if (params && params.isAdmin !== undefined) {
+      setIsAdmin(params.isAdmin);
+    }
+  }, [route]);  
+  
   // Default coordinates for the initial map region
   const defaultCoordinates = {
     latitude: 25.5356,
@@ -235,6 +250,12 @@ const MapPage = () => {
     console.log('Reset button pressed!');
   };
 
+  // Handle the press event on the dashboard button
+  const handleDashboardPress = () => {
+    // Show an alert when the dashboard button is pressed
+    Alert.alert('Welcome to the Dashboard', 'You have access to admin features.');
+  };
+
   // Handle the search for a place by name
   const handleSearchPlace = async (query) => {
     // Check if there is a valid search query
@@ -369,6 +390,13 @@ const MapPage = () => {
       {/* ResetButton component */}
       <ResetButton onReset={handleResetPress} />
 
+      {/* Dashboard button */}
+      {isAdmin && (
+        <TouchableOpacity style={styles.dashboardButton} onPress={handleDashboardPress}>
+          <Text style={styles.buttonText}>Dashboard</Text>
+        </TouchableOpacity>
+      )}
+
       {/* StartButton component */}
       <StartButton markers={markers} />
 
@@ -391,6 +419,16 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'lightgrey',
+  },
+  dashboardButton: {
+    backgroundColor: '#8e44ad', // Violet color
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

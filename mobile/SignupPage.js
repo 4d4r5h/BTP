@@ -26,9 +26,9 @@ const SignupPage = () => {
           }),
         });
 
-        console.log('Request sent to server!');
+        console.log('Signup request sent to server!');
         const data = await response.json();
-        console.log('Response from server:', data);
+        console.log('Signup response from server:', data);
 
         if (data && Object.keys(data).length > 0) {
           // Successful signup
