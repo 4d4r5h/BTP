@@ -6,16 +6,41 @@ const LoginPage = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Implement your authentication logic here
-    // For simplicity, I'll consider a successful login when both fields are non-empty
+  const endpoint = 'http://10.35.13.102:3000/login';
+  const handleLogin = async () => {
     if (username.trim() !== '' && password.trim() !== '') {
-      Alert.alert('Login Successful', 'Ready, set, go!');
-      // Navigate to the MapPage on successful login
-      navigation.navigate('Map');
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+            isAdmin: false,
+          }),
+        });
+
+        console.log('Request sent to server!');
+        const data = await response.json();
+        console.log('Response from server:', data);
+
+        if (data && Object.keys(data).length > 0) {
+          // Successful login
+          Alert.alert('Login Successful', 'Ready, set, go!');
+          navigation.navigate('Map');
+        } else {
+          // Unsuccessful login
+          Alert.alert('Invalid credentials', 'Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+        Alert.alert('Login Failed', 'An error occurred. Please try again later.');
+      }
     } else {
-      // Display an alert or error message for unsuccessful login
-      Alert.alert('Invalid credentials', 'Please try again.');
+      // Display an alert or error message for empty credentials
+      Alert.alert('Invalid credentials', 'Please enter both username and password.');
     }
   };
 

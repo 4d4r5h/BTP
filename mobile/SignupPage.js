@@ -9,18 +9,41 @@ const SignupPage = () => {
 
   const navigation = useNavigation();
 
-  const handleSignup = () => {
-    // Implement your signup logic here
-    // For simplicity, I'll consider a successful signup when both fields are non-empty
+  const endpoint = 'http://10.35.13.102:3000/signup';
+  const handleSignup = async () => {
     if (username.trim() !== '' && password.trim() !== '') {
-      // Display a pop-up message on successful signup
-      Alert.alert('Signup Successful', 'Your account has been created successfully.');
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    isAdmin: false,
+                }),
+            });
 
-      // Navigate back to the login page
-      navigation.navigate('Login');
+            console.log('Request sent to server!');
+            const data = await response.json();
+            console.log('Response from server:', data);
+
+            if (data && Object.keys(data).length > 0) {
+            // Successful signup
+            Alert.alert('Signup Successful', 'Your account has been created successfully.');
+            navigation.navigate('Login');
+            } else {
+                // Display an alert or error message for unsuccessful signup
+                Alert.alert('Invalid credentials', 'Please try again.');
+            }
+        } catch (error) {
+            console.error('Error during signup:', error);
+            Alert.alert('Signup Failed', 'An error occurred. Please try again later.');
+        }
     } else {
-      // Display an alert or error message for unsuccessful signup
-      Alert.alert('Invalid credentials', 'Please try again.');
+        // Display an alert or error message for empty credentials
+        Alert.alert('Invalid credentials', 'Please enter both username and password.');
     }
   };
 
