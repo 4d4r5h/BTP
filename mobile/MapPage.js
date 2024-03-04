@@ -200,8 +200,6 @@ const MapPage = () => {
         }],
       };
 
-      const endpoint = 'http://10.35.13.102:3000/api';
-
       let response;
       try {
         // Call the function to send data to the endpoint
@@ -336,8 +334,6 @@ const MapPage = () => {
           latitude:25.550541461120954
         }],
       };
-
-      const endpoint = 'http://10.35.13.102:3000/api';
 
       let response;
       try {

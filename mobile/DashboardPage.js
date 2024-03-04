@@ -1,8 +1,12 @@
 // DashboardPage.js
-import React from 'react';
+import React, { useState } from 'react';
 import { View, ScrollView, Text, TextInput, Button, Alert } from 'react-native';
 
 const DashboardPage = () => {
+  const [label, setLabel] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+
   // Mock data for recent trips
   const recentTripsData = [
     { id: 1, tripName: 'Trip 1', distance: '30 miles' },
@@ -35,9 +39,60 @@ const DashboardPage = () => {
     // ... (add more data)
   ];
 
-  const handleAddStation = () => {
-    // You can add the logic to handle adding a station here
-    Alert.alert('Station Added', 'Station has been added.');
+  const handleAddStation = async () => {
+    // Check if any of the input fields are empty
+    if (!label || !latitude || !longitude) {
+      Alert.alert('Incomplete Details', 'Please fill in all station details.');
+      return;
+    }
+
+    try {
+      // Construct the request payload
+      const requestData = {
+        label: label,
+        location: {
+          latitude: parseFloat(latitude), // Parse latitude as a float
+          longitude: parseFloat(longitude), // Parse longitude as a float
+        },
+      };
+
+      console.log('Request data to add station:', requestData);
+
+      const endpoint = 'http://10.35.13.102:3000/add_stations';
+
+      // Use a temporary variable to store the response
+      let response;
+
+      try {
+        // Call the function to send data to the endpoint
+        const fetchResponse = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        response = await fetchResponse.json();
+        console.log('Add stations response from server:', response);
+      } catch (error) {
+        // Handle errors that may occur during the data sending process
+        console.error('Error in sending data to endpoint:', error);
+        throw new Error('Error in sending data to endpoint');
+      }
+
+      // Check if there is no 'error' field in the response
+      if (!response || !response.error) {
+        Alert.alert('Success', 'A new station has been added successfully.');
+      } else {
+        // Handle the case where the server returns an error
+        Alert.alert('Error', response.error);
+      }
+    } catch (error) {
+      // Handle unexpected errors during the add station process
+      console.error('Error in handleAddStation:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+    }
   };
 
   return (
@@ -91,6 +146,8 @@ const DashboardPage = () => {
         <TextInput
           style={{ flex: 1, marginRight: 8, padding: 8, borderColor: 'gray', borderWidth: 1 }}
           placeholder="Enter Label"
+          value={label}
+          onChangeText={text => setLabel(text)}
         />
         <Button title="Add Station" onPress={handleAddStation} />
       </View>
@@ -100,10 +157,14 @@ const DashboardPage = () => {
         <TextInput
           style={{ flex: 1, marginRight: 8, padding: 8, borderColor: 'gray', borderWidth: 1 }}
           placeholder="Enter Latitude"
+          value={latitude}
+          onChangeText={text => setLatitude(text)}
         />
         <TextInput
           style={{ flex: 1, marginRight: 8, padding: 8, borderColor: 'gray', borderWidth: 1 }}
           placeholder="Enter Longitude"
+          value={longitude}
+          onChangeText={text => setLongitude(text)}
         />
       </View>
     </View>
