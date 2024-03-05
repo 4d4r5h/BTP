@@ -35,7 +35,7 @@ const LoginPage = ({ navigation }) => {
           if (!data.hasOwnProperty("error")) {
             // Successful login
             Alert.alert('Login Successful', 'Ready, set, go!');
-            navigation.navigate('Map', { isAdmin: isAdminTab });
+            navigation.navigate('Map', { username: username, isAdmin: isAdminTab });
           } else {
             Alert.alert('Login failed', data.error.message);
           }

@@ -16,11 +16,13 @@ const MapPage = () => {
 
   // State to manage whether the user is logged in as an admin
   const [isAdmin, setIsAdmin] = useState(false);
+  const [username, setUsername] = useState('');
 
   React.useEffect(() => {
     // Access the isAdmin value from the route parameter
     const { params } = route;
-    if (params && params.isAdmin !== undefined) {
+    if (params && params.username !== undefined && params.isAdmin !== undefined) {
+      setUsername(params.username);
       setIsAdmin(params.isAdmin);
     }
   }, [route]);
@@ -224,6 +226,62 @@ const MapPage = () => {
     } catch (error) {
       // Handle unexpected errors during the marker drag handling
       console.error('Error in handleMarkerDragEnd:', error);
+    }
+  };
+
+  // Handle the press event on the "Start" button
+  const handleStartPress = async () => {
+    try {
+      // Check if there are at least two waypoints
+      if (wayPoints.length < 2) {
+        console.warn('Insufficient waypoints to start the journey.');
+        return;
+      }
+
+      // Construct the request payload
+      const requestData = {
+        username: username,
+        startLocation: wayPoints[0],
+        endLocation: wayPoints[wayPoints.length - 1],
+        chargingStations: responseStations,
+      };
+
+      console.log('Start journey request data:', requestData);
+      const endpoint = 'http://10.35.13.102:3000/start_trip';
+
+      // Use a temporary variable to store the response
+      let response;
+
+      try {
+        // Call the function to send data to the endpoint
+        const fetchResponse = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        response = await fetchResponse.json();
+        console.log('Start journey response from server:', response);
+      } catch (error) {
+        // Handle errors that may occur during the data sending process
+        console.error('Error in sending data to endpoint:', error);
+        throw new Error('Error in sending data to endpoint');
+      }
+
+      // Check if there is no 'error' field in the response
+      if (response && !response.error) {
+        // No error, journey started successfully
+        Alert.alert('Journey started', 'Have a safe journey!');
+      } else {
+        // Handle the case where the server returns an error
+        Alert.alert('Error', response.error);
+      }
+    } catch (error) {
+      // Handle unexpected errors during the start journey process
+      console.error('Error in handleStartPress:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
     }
   };
 
