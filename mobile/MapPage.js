@@ -470,6 +470,8 @@ const MapPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: '17.5%', // So that MapWithMarkers and topCenterWrapper (3 buttons) do not intersect
+    // NOTE: padding 70 units works for my screen
   },
   topCenterWrapper: {
     position: 'absolute',
