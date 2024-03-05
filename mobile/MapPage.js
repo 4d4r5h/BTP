@@ -10,6 +10,8 @@ import StartButton from './StartButton';
 import { sendDataToEndpoint } from './sendDataToEndpoint';
 import DashboardButton from './DashboardButton';
 
+const initialBatteryCharge = 135000;
+
 const MapPage = () => {
   const navigation = useNavigation(); // Use useNavigation hook to get navigation object
   const route = useRoute();
@@ -92,24 +94,15 @@ const MapPage = () => {
       // Prepare data to be sent to the server
       const requestData = {
         waypoints: [...wayPoints, coordinate],
-        initialBatteryCharge: 135,
-        fullBatteryChargeCapacity: 23000,
-        dischargingRate: 37,
-        chargingRate: 1332,
-        chargingStations: [{
-          longitude:84.85785227268934,
-          latitude:25.550541461120954
-        }],
+        initialBatteryCharge: initialBatteryCharge,
       };
-  
-      const endpoint = 'http://10.35.13.102:3000/api';
   
       // Use a temporary variable to store the response
       let response;
   
       try {
         // Call the function to send data to the endpoint
-        response = await sendDataToEndpoint(requestData, endpoint);
+        response = await sendDataToEndpoint(requestData);
       } catch (error) {
         // Handle errors that may occur during the data sending process
         console.error('Error in sendDataToEndpoint:', error);
@@ -134,8 +127,8 @@ const MapPage = () => {
           longitudeDelta: 0.0421,
         });
       } else {
-        // Handle the case where the response is invalid or missing the 'stations' property
-        console.error('Invalid response format in charging stations.');
+        // Handle the case where the response is invalid
+        console.log('No charging stations required.');
       }
     }
   
@@ -192,20 +185,13 @@ const MapPage = () => {
       // Sending request to web server after marker drag
       const requestData = {
         waypoints: updatedWayPoints,
-        initialBatteryCharge: 135,
-        fullBatteryChargeCapacity: 23000,
-        dischargingRate: 37,
-        chargingRate: 1332,
-        chargingStations: [{
-          longitude:84.85785227268934,
-          latitude:25.550541461120954
-        }],
+        initialBatteryCharge: initialBatteryCharge,
       };
 
       let response;
       try {
         // Call the function to send data to the endpoint
-        response = await sendDataToEndpoint(requestData, endpoint);
+        response = await sendDataToEndpoint(requestData);
       } catch (error) {
         // Handle errors that may occur during the data sending process
         console.error('Error in sendDataToEndpoint:', error);
@@ -383,20 +369,13 @@ const MapPage = () => {
       // Sending request to web server
       const requestData = {
         waypoints: [...wayPoints, newMarker.coordinate],
-        initialBatteryCharge: 135,
-        fullBatteryChargeCapacity: 23000,
-        dischargingRate: 37,
-        chargingRate: 1332,
-        chargingStations: [{
-          longitude:84.85785227268934,
-          latitude:25.550541461120954
-        }],
+        initialBatteryCharge: initialBatteryCharge,
       };
 
       let response;
       try {
         // Call the function to send data to the endpoint
-        response = await sendDataToEndpoint(requestData, endpoint);
+        response = await sendDataToEndpoint(requestData);
       } catch (error) {
         // Handle errors that may occur during the data sending process
         console.error('Error in sendDataToEndpoint:', error);

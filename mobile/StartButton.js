@@ -7,6 +7,8 @@ const StartButton = ({ markers, onStartPress }) => {
       // If there are more than 1 markers, log "Journey started"
       console.log('Journey started');
       Alert.alert('Trip started.', 'Have a safe journey!');
+      // Call the onStartPress function passed from the parent component (MapPage)
+      onStartPress();
     } else {
       // If there is only 1 marker, show an alert
       Alert.alert('Missing destination', 'Please select your destination first!');

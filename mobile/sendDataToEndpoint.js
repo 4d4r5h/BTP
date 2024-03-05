@@ -1,5 +1,8 @@
 // sendDataToEndpoint.js
-const sendDataToEndpoint = async (requestData, endpoint) => {
+const sendDataToEndpoint = async (requestData) => {
+  
+  const endpoint = 'http://10.35.13.102:3000/api';
+
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
