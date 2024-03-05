@@ -7,6 +7,7 @@ import ResetButton from './ResetButton';
 import SearchBar from './SearchBar';
 import SearchResultList from './SearchResultList';
 import StartButton from './StartButton';
+import EndButton from './EndButton';
 import { sendDataToEndpoint } from './sendDataToEndpoint';
 import DashboardButton from './DashboardButton';
 
@@ -293,6 +294,57 @@ const MapPage = () => {
     }
   };
 
+  // Handle the press event on the "End" button
+  const handleEndPress = async () => {
+    try {
+      // Construct the request payload
+      const endRequestData = {
+        id: tripID,
+      };
+
+      // Define the endpoint for ending the trip
+      const endEndpoint = 'http://10.35.13.102:3000/end_trip';
+
+      // Use a temporary variable to store the end trip response
+      let endResponse;
+
+      try {
+        // Send a POST request to the end_trip endpoint
+        const endFetchResponse = await fetch(endEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(endRequestData),
+        });
+
+        // Parse the response into JSON format
+        endResponse = await endFetchResponse.json();
+        console.log('End journey response from server:', endResponse);
+      } catch (error) {
+        // Handle errors that may occur during the data sending process
+        console.error('Error in sending data to endpoint:', error);
+        throw new Error('Error in sending data to endpoint');
+      }
+
+      // Check if there is 'isCompleted' field in the response and it is true
+      if (endResponse && endResponse.isCompleted) {
+        // Journey ended successfully
+        Alert.alert('Journey ended', 'Hope you had a great trip!');
+        
+        // Reset tripID to blank
+        setTripID('');
+      } else {
+        // Handle the case where the server returns an error or isCompleted is not true
+        Alert.alert('Error', 'Error in ending trip. Please try again.');
+      }
+    } catch (error) {
+      // Handle unexpected errors during the end journey process
+      console.error('Error in handleEndPress:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+    }
+  };
+
   // Handle the press event on the reset button
   const handleResetPress = () => {
     setMarkers([defaultMarker]);
@@ -431,6 +483,17 @@ const MapPage = () => {
     </TouchableOpacity>
   );
 
+  // Conditionally render StartButton or EndButton based on tripID
+  const renderActionButton = () => {
+    if (tripID !== '') {
+      // Render EndButton if tripID is not blank
+      return <EndButton tripID={tripID} onEndPress={handleEndPress} />;
+    } else {
+      // Render StartButton if tripID is blank
+      return <StartButton markers={markers} onStartPress={handleStartPress} />;
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Input for initial battery charge */}
@@ -461,8 +524,8 @@ const MapPage = () => {
         {/* Dashboard button */}
         {isAdmin && <DashboardButton onPress={handleDashboardPress} />}
 
-        {/* StartButton component */}
-        <StartButton markers={markers} onStartPress={handleStartPress} />
+        {/* Conditionally render StartButton or EndButton */}
+        {renderActionButton()}
 
         {/* ResetButton component */}
         <ResetButton onReset={handleResetPress} />
