@@ -1,6 +1,6 @@
 // MapPage.js
 import React, { useState, useRef } from 'react';
-import { StyleSheet, View, Alert, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, Alert, TouchableOpacity, Text, TextInput, Button } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import MapWithMarkers from './MapWithMarkers';
 import ResetButton from './ResetButton';
@@ -10,7 +10,7 @@ import StartButton from './StartButton';
 import { sendDataToEndpoint } from './sendDataToEndpoint';
 import DashboardButton from './DashboardButton';
 
-const initialBatteryCharge = 135000;
+const defaultBatteryCharge = 10000;
 
 const MapPage = () => {
   const navigation = useNavigation(); // Use useNavigation hook to get navigation object
@@ -19,6 +19,9 @@ const MapPage = () => {
   // State to manage whether the user is logged in as an admin
   const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState('');
+  const [inputBatteryCharge, setInputBatteryCharge] = useState('');
+  const [initialBatteryCharge, setInitialBatteryCharge] = useState(defaultBatteryCharge);  
+  const [tripID, setTripID] = useState('');
 
   React.useEffect(() => {
     // Access the isAdmin value from the route parameter
@@ -73,6 +76,22 @@ const MapPage = () => {
   // Reference for the MapView component
   const mapRef = useRef(null);
 
+  // Handler for changing the input battery charge
+  const handleInputBatteryChargeChange = (text) => {
+    setInputBatteryCharge(text);
+  };
+
+  // Handler for setting the initial battery charge
+  const handleSetInitialBatteryCharge = () => {
+    const parsedInput = parseInt(inputBatteryCharge, 10);
+    if (!isNaN(parsedInput) && parsedInput >= 0 && parsedInput <= 100) {
+      setInitialBatteryCharge(parsedInput * defaultBatteryCharge / 100.0);
+      console.log('Initial Battery Charge:', initialBatteryCharge)
+    } else {
+      Alert.alert('Invalid Input', 'Please enter a valid non-negative number.');
+    }
+  };
+  
   // Handle the press event on the map to add a new marker
   const handleMapPress = async (event) => {
     try {
@@ -128,7 +147,7 @@ const MapPage = () => {
         });
       } else {
         // Handle the case where the response is invalid
-        console.log('No charging stations required.');
+        console.log('No charging stations on path.');
       }
     }
   
@@ -250,6 +269,9 @@ const MapPage = () => {
 
         response = await fetchResponse.json();
         console.log('Start journey response from server:', response);
+        if(response.id) {
+          setTripID(response.id);
+        }
       } catch (error) {
         // Handle errors that may occur during the data sending process
         console.error('Error in sending data to endpoint:', error);
@@ -411,6 +433,17 @@ const MapPage = () => {
 
   return (
     <View style={styles.container}>
+      {/* Input for initial battery charge */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Initial Battery Percentage"
+          keyboardType="numeric"
+          onChangeText={handleInputBatteryChargeChange}
+        />
+        <Button title="Set" onPress={handleSetInitialBatteryCharge} />
+      </View>
+      
       {/* MapWithMarkers component */}
       <MapWithMarkers
         markers={markers}
@@ -429,7 +462,7 @@ const MapPage = () => {
         {isAdmin && <DashboardButton onPress={handleDashboardPress} />}
 
         {/* StartButton component */}
-        <StartButton markers={markers} />
+        <StartButton markers={markers} onStartPress={handleStartPress} />
 
         {/* ResetButton component */}
         <ResetButton onReset={handleResetPress} />
@@ -449,7 +482,7 @@ const MapPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: '17.5%', // So that MapWithMarkers and topCenterWrapper (3 buttons) do not intersect
+    paddingTop: '17.5%',
     // NOTE: padding 70 units works for my screen
   },
   topCenterWrapper: {
@@ -458,7 +491,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    justifyContent: 'center', // Align items horizontally at the center
+    justifyContent: 'center',
     flexDirection: 'row',
     backgroundColor: 'transparent',
     zIndex: 2,
@@ -467,6 +500,19 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'lightgrey',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginLeft: 10,
+  },
+  input: {
+    flex: 1,
+    marginRight: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'lightgrey',
+    paddingVertical: 5,
   },
 });
 
