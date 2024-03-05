@@ -1,6 +1,4 @@
 // StartButton.js
-
-import React from 'react';
 import { TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
 
 const StartButton = ({ markers, onStartPress }) => {

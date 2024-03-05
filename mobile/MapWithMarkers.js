@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+// MapWithMarkers.js
+import React from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 

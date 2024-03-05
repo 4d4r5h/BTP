@@ -4,21 +4,21 @@ import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 const DashboardButton = ({ onPress }) => {
   return (
-    <TouchableOpacity style={styles.DashboardButton} onPress={onPress}>
-      <Text style={styles.DashboardButtonText}>Dashboard</Text>
+    <TouchableOpacity style={styles.dashboardButton} onPress={onPress}>
+      <Text style={styles.dashboardButtonText}>Dashboard</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  DashboardButton: {
+  dashboardButton: {
     position: 'absolute',
     top: 16,
     backgroundColor: 'purple',
     padding: 12,
     borderRadius: 8,
   },
-  DashboardButtonText: {
+  dashboardButtonText: {
     color: 'white',
     fontWeight: 'bold',
   },

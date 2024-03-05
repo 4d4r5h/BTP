@@ -1,4 +1,4 @@
-// Import necessary React components and styles
+// SearchResultList.js
 import React from 'react';
 import { FlatList, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
