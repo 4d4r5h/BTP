@@ -39,7 +39,7 @@ const SignupPage = () => {
           if (!data.hasOwnProperty("error")) {
             // Successful signup
             Alert.alert('Signup Successful', 'Your account has been created successfully.');
-            navigation.navigate('Map', { isAdmin: isAdminTab });
+            navigation.navigate('Login');
           } else {
             Alert.alert('Signup failed', data.error.message);
           }

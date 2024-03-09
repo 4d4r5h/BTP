@@ -20,7 +20,7 @@ const sendDataToEndpoint = async (requestData) => {
     }
 
     const result = await response.json();
-    console.log('Response from endpoint:', result);
+    console.log('Response from endpoint:', result.stations, result.time);
     return result;
   } catch (error) {
     console.error('Error sending request data to the endpoint:', error);
@@ -28,4 +28,4 @@ const sendDataToEndpoint = async (requestData) => {
   }
 };
   
-export { sendDataToEndpoint };  
+export { sendDataToEndpoint };
