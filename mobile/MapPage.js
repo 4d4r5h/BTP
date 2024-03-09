@@ -126,6 +126,30 @@ const MapPage = () => {
     }
   };
 
+  const fetchRecentTrips = async () => {
+    try {
+      // Make a GET request to the /show_stations endpoint
+      const response = await fetch('http://10.35.13.102:3000/show_trips');
+      
+      // Check if the response status is OK (200)
+      if (response.ok) {
+        // Parse the JSON response
+        const trips = await response.json();
+
+        // Return the formatted stations data
+        return trips;
+      } else {
+        // Handle non-OK response status
+        console.error('Error fetching recent trips:', response.statusText);
+        throw new Error('Error fetching recent trips');
+      }
+    } catch (error) {
+      // Handle errors that may occur during the fetch or parsing process
+      console.error('Error fetching recent trips:', error);
+      throw new Error('Error fetching recent trips');
+    }
+  };
+
   
   // Handle the press event on the map to add a new marker
   const handleMapPress = async (event) => {
