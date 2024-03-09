@@ -33,6 +33,11 @@ const MapPage = () => {
     }
   }, [route]);
 
+  // useEffect to fetch charging stations when the component mounts
+  React.useEffect(() => {
+    fetchChargingStations();
+  }, []); // Empty dependency array means this effect runs once when the component mounts
+
   // Default coordinates for the initial map region
   const defaultCoordinates = {
     latitude: 25.5356,
@@ -56,6 +61,7 @@ const MapPage = () => {
 
   // State to manage charging stations on the map
   const [responseStations, setResponseStations] = useState([]);
+  const [allStations, setAllStations] = useState([]);
 
   // State to manage the way points
   const [wayPoints, setWayPoints] = useState([
@@ -92,6 +98,34 @@ const MapPage = () => {
       Alert.alert('Invalid Input', 'Please enter a valid non-negative number.');
     }
   };
+
+  const fetchChargingStations = async () => {
+    try {
+      // Make a GET request to the /show_stations endpoint
+      const response = await fetch('http://10.35.13.102:3000/show_stations');
+      
+      // Check if the response status is OK (200)
+      if (response.ok) {
+        // Parse the JSON response
+        const stations = await response.json();
+
+        // Update the allStations state
+        setAllStations(stations);
+
+        // Return the formatted stations data
+        return stations;
+      } else {
+        // Handle non-OK response status
+        console.error('Error fetching charging stations:', response.statusText);
+        throw new Error('Error fetching charging stations');
+      }
+    } catch (error) {
+      // Handle errors that may occur during the fetch or parsing process
+      console.error('Error fetching charging stations:', error);
+      throw new Error('Error fetching charging stations');
+    }
+  };
+
   
   // Handle the press event on the map to add a new marker
   const handleMapPress = async (event) => {
@@ -513,6 +547,7 @@ const MapPage = () => {
         pathCoordinates={pathCoordinates}
         onMapPress={handleMapPress}
         responseStations={responseStations}
+        allStations={allStations}
         onMarkerPress={handleMarkerPress}
         onMarkerDragEnd={handleMarkerDragEnd}
         initialRegion={defaultCoordinates}

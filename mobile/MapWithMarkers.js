@@ -1,16 +1,26 @@
 // MapWithMarkers.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
-const MapWithMarkers = ({ markers, pathCoordinates, responseStations = [], onMapPress, onMarkerPress, onMarkerDragEnd, initialRegion, mapRef }) => {
+const MapWithMarkers = ({ markers, pathCoordinates, responseStations = [], allStations = [], onMapPress, onMarkerPress, onMarkerDragEnd, initialRegion, mapRef }) => {
+  // Introduce state to manage charging stations
+  const [chargingStations, setChargingStations] = useState([]);
+
+  // Update chargingStations when allStations changes
+  useEffect(() => {
+    setChargingStations(allStations);
+  }, [allStations]);
+
+  console.log('List of all charging stations on Map:', chargingStations);
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
         initialRegion={initialRegion}
-        onPress={onMapPress} // Call onMapPress function on map press
+        onPress={onMapPress}
       >
         {/* Display markers on the map */}
         {markers.map((marker) => (
@@ -18,9 +28,9 @@ const MapWithMarkers = ({ markers, pathCoordinates, responseStations = [], onMap
             key={marker.id}
             coordinate={marker.coordinate}
             title={marker.title}
-            draggable={true} // Set draggable to true
-            onDragEnd={(e) => onMarkerDragEnd(marker, e.nativeEvent.coordinate)} // Handle drag end event
-            onPress={() => onMarkerPress(marker)} // Call onMarkerPress function on marker press
+            draggable={true}
+            onDragEnd={(e) => onMarkerDragEnd(marker, e.nativeEvent.coordinate)}
+            onPress={() => onMarkerPress(marker)}
           />
         ))}
 
@@ -39,6 +49,16 @@ const MapWithMarkers = ({ markers, pathCoordinates, responseStations = [], onMap
             key={index}
             coordinate={{ latitude: station.latitude, longitude: station.longitude }}
             title={`Charging Station ${index + 1}`}
+            pinColor="blue"
+          />
+        ))}
+
+        {/* Display yellow labels for all charging stations */}
+        {chargingStations.map((station, index) => (
+          <Marker
+            key={index}
+            coordinate={{ latitude: station.location.latitude, longitude: station.location.longitude }}
+            title={station.label}
             pinColor="blue"
           />
         ))}
